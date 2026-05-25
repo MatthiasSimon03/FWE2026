@@ -28,6 +28,29 @@ to your `app` folder. The affected files can be copied or merged from
 Copy `env` to `.env` and tailor for your app, specifically the baseURL
 and any database settings.
 
+## Tic Tac Toe ohne PHP
+
+Für das Tic-Tac-Toe-Spiel wurde eine reine Frontend-Variante erstellt:
+
+- `public/index.html`
+- `public/assets/css/style.css`
+- `public/assets/js/game.js`
+
+Öffne die Seite direkt über den Webserver oder lokal im Browser.
+Die Datei `public/.htaccess` priorisiert `index.html` vor `index.php`, damit die statische Version als Startseite geladen wird.
+
+### Ordnerstruktur
+
+```text
+public/
+  index.html
+  assets/
+	css/
+	  style.css
+	js/
+	  game.js
+```
+
 ## Important Change with index.php
 
 `index.php` is no longer in the root of the project! It has been moved inside the *public* folder,

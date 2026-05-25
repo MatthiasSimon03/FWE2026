@@ -1,0 +1,56 @@
+<!doctype html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Tic Tac Toe als reine HTML-, CSS- und JavaScript-Implementierung.">
+    <title>Tic Tac Toe</title>
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+<body>
+<div class="bg-orb bg-orb-left" aria-hidden="true"></div>
+<div class="bg-orb bg-orb-right" aria-hidden="true"></div>
+
+<main class="app-shell">
+    <header class="hero">
+        <div class="hero-copy">
+            <p class="eyebrow">CodeIgniter-Projekt · Frontend-only</p>
+            <h1>Tic Tac Toe</h1>
+            <p class="lead">Ein elegantes 3×3-Spiel mit Gewinnprüfung, Remis-Erkennung und Neustart – komplett ohne PHP im Spiellogik-Teil.</p>
+        </div>
+
+        <aside class="hero-panel" aria-label="Spielstatus">
+            <div class="panel-row">
+                <span class="label">Aktiver Spieler</span>
+                <strong id="currentPlayer">X</strong>
+            </div>
+            <div class="panel-row">
+                <span class="label">Status</span>
+                <strong id="statusText">Spiel gestartet. Spieler X beginnt.</strong>
+            </div>
+            <div class="panel-row panel-row-hint">
+                <span class="label">Tipp</span>
+                <span>Ein Feld antippen, dann übernimmt der nächste Spieler automatisch.</span>
+            </div>
+        </aside>
+    </header>
+
+    <section class="board-section" aria-label="Tic Tac Toe Spielfeld">
+        <div class="board-frame">
+            <div id="board" class="board" role="grid" aria-label="Spielfeld"></div>
+        </div>
+    </section>
+
+    <section class="actions">
+        <button id="resetBtn" type="button">Neues Spiel</button>
+    </section>
+
+    <footer class="footer">
+        <p>X beginnt immer. Gewonnen wird mit drei gleichen Zeichen in einer Reihe, Spalte oder Diagonale.</p>
+    </footer>
+</main>
+
+<script src="assets/js/game.js"></script>
+</body>
+</html>
+
