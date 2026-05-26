@@ -1,3 +1,10 @@
+<?php
+if (!isset($task)) {
+    $task = ['text' => '', 'answer_type' => 'text', 'answer' => '', 'points' => 1];
+}
+$stationId = $stationId ?? 0;
+$rallyId = $rallyId ?? 0;
+?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -56,7 +63,7 @@
 
             <div class="button-group">
                 <button type="submit">Speichern</button>
-                <a href="javascript:history.back()">Abbrechen</a>
+                <a href="<?= site_url('admin/tasks/' . $stationId) ?>">Abbrechen</a>
             </div>
         </form>
     </div>

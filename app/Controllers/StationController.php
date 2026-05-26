@@ -30,6 +30,12 @@ class StationController extends BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Station nicht gefunden.');
         }
 
+        $userId = session()->get('user_id');
+        foreach ($station['tasks'] as &$task) {
+            $task['already_solved'] = $this->submissionModel->hasCorrectSubmission($userId, $task['id']);
+        }
+        unset($task);
+
         return view('station/show', ['station' => $station]);
     }
 
@@ -50,9 +56,12 @@ class StationController extends BaseController
             return redirect()->back()->with('error', 'Bitte geben Sie eine Antwort ein.');
         }
 
+        if ($this->submissionModel->hasCorrectSubmission($userId, $taskId)) {
+            return redirect()->back()->with('error', 'Sie haben diese Aufgabe bereits richtig gelöst.');
+        }
+
         if ($this->submissionModel->submitAnswer($userId, $taskId, $submittedAnswer)) {
-            $taskModel = new TaskModel();
-            $evaluation = $taskModel->evaluateAnswer($taskId, $submittedAnswer);
+            $evaluation = $this->taskModel->evaluateAnswer($taskId, $submittedAnswer);
 
             $message = $evaluation['correct']
                 ? "Richtig! Sie erhalten {$evaluation['points']} Punkte."

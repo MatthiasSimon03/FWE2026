@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rallyen verwalten</title>
+    <title>Rallys verwalten</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f5f5f5; }
@@ -25,7 +25,7 @@
 </head>
 <body>
     <div class="navbar">
-        <h1>Rallyen verwalten</h1>
+        <h1>Rallys verwalten</h1>
     </div>
 
     <div class="container">

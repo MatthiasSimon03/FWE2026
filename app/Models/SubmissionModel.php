@@ -29,6 +29,14 @@ class SubmissionModel extends Model
         ]);
     }
 
+    public function hasCorrectSubmission($userId, $taskId)
+    {
+        return $this->where('user_id', $userId)
+                    ->where('task_id', $taskId)
+                    ->where('is_correct', 1)
+                    ->first() !== null;
+    }
+
     public function getUserScoreForRally($userId, $rallyId)
     {
         $db = \Config\Database::connect();
@@ -58,4 +66,3 @@ class SubmissionModel extends Model
         ", [$rallyId])->getResult('array');
     }
 }
-

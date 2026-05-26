@@ -23,6 +23,25 @@ class Tasks extends \App\Controllers\BaseController
         }
     }
 
+    public function index($stationId)
+    {
+        $this->checkAdmin();
+
+        $station = $this->stationModel->find($stationId);
+        if (!$station) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Station nicht gefunden.');
+        }
+
+        $tasks = $this->taskModel->where('station_id', $stationId)->findAll();
+
+        return view('admin/tasks/list', [
+            'station' => $station,
+            'tasks' => $tasks,
+            'stationId' => $stationId,
+            'rallyId' => $station['rally_id']
+        ]);
+    }
+
     public function create($stationId)
     {
         $this->checkAdmin();
@@ -45,7 +64,7 @@ class Tasks extends \App\Controllers\BaseController
                 'meta' => $this->request->getPost('meta') ?: null
             ]);
 
-            return redirect()->to(site_url('admin/stations/' . $rallyId))->with('success', 'Aufgabe erstellt.');
+                    return redirect()->to(site_url('admin/tasks/' . $stationId))->with('success', 'Aufgabe erstellt.');
         }
 
         return view('admin/tasks/create', ['stationId' => $stationId, 'rallyId' => $rallyId]);
@@ -60,6 +79,11 @@ class Tasks extends \App\Controllers\BaseController
             throw new \CodeIgniter\Exceptions\PageNotFoundException('Aufgabe nicht gefunden.');
         }
 
+        $station = $this->stationModel->find($task['station_id']);
+        if (!$station) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Station nicht gefunden.');
+        }
+
         if ($this->request->is('post')) {
             $this->taskModel->update($taskId, [
                 'text' => $this->request->getPost('text'),
@@ -69,16 +93,26 @@ class Tasks extends \App\Controllers\BaseController
                 'meta' => $this->request->getPost('meta') ?: null
             ]);
 
-            return redirect()->back()->with('success', 'Aufgabe aktualisiert.');
+            return redirect()->to(site_url('admin/tasks/' . $station['id']))->with('success', 'Aufgabe aktualisiert.');
         }
 
-        return view('admin/tasks/edit', ['task' => $task]);
+        return view('admin/tasks/edit', ['task' => $task, 'stationId' => $station['id'], 'rallyId' => $station['rally_id']]);
     }
 
     public function delete($taskId)
     {
         $this->checkAdmin();
+        $task = $this->taskModel->find($taskId);
+        if (!$task) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Aufgabe nicht gefunden.');
+        }
+
+        $station = $this->stationModel->find($task['station_id']);
+        if (!$station) {
+            throw new \CodeIgniter\Exceptions\PageNotFoundException('Station nicht gefunden.');
+        }
+
         $this->taskModel->delete($taskId);
-        return redirect()->back()->with('success', 'Aufgabe gelöscht.');
+        return redirect()->to(site_url('admin/tasks/' . $station['id']))->with('success', 'Aufgabe gelöscht.');
     }
 }

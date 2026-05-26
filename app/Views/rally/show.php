@@ -11,7 +11,7 @@
         .navbar a { color: white; text-decoration: none; margin-left: 20px; }
         .navbar a:hover { text-decoration: underline; }
         .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
-        h1 { color: #333; margin-bottom: 10px; }
+        h1 { color: #007bff; margin-bottom: 10px; }
         .description { color: #666; margin-bottom: 30px; line-height: 1.6; }
         h2 { color: #007bff; margin-top: 30px; margin-bottom: 15px; }
         .station-list { list-style: none; }
@@ -40,7 +40,7 @@
 
     <div class="container">
         <div class="back-link">
-            <a href="<?= site_url('rally') ?>">← Zurück zu Rallyen</a>
+            <a href="<?= site_url('rally') ?>">← Zurück zu Rallys</a>
         </div>
 
         <h1><?= esc($rally['title']) ?></h1>

@@ -15,7 +15,7 @@
         .navbar a { color: white; text-decoration: none; margin-left: 20px; }
         .navbar a:hover { text-decoration: underline; }
         .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
-        h1 { color: #333; margin-bottom: 20px; }
+        h1 { color: #007bff; margin-bottom: 20px; }
         .rally-selector { margin-bottom: 30px; }
         .rally-selector label { margin-right: 10px; font-weight: bold; }
         .rally-selector select { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
@@ -37,7 +37,7 @@
         <div>
             <?php if (session()->get('user_id')): ?>
                 <span><?= esc(session()->get('name')) ?></span>
-                <a href="<?= site_url('rally') ?>">Rallyen</a>
+                <a href="<?= site_url('rally') ?>">Rallys</a>
                 <a href="<?= site_url('auth/logout') ?>">Abmelden</a>
             <?php else: ?>
                 <a href="<?= site_url('auth/login') ?>">Anmelden</a>
@@ -48,7 +48,7 @@
 
     <div class="container">
         <div class="back-link">
-            <a href="<?= site_url('rally') ?>">← Zurück zu Rallyen</a>
+            <a href="<?= site_url('rally') ?>">← Zurück zu Rallys</a>
         </div>
 
         <h1>Leaderboard</h1>

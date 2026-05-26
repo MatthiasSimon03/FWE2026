@@ -44,7 +44,7 @@
         <div>
             <?php if (session()->get('user_id')): ?>
                 <span><?= esc(session()->get('name')) ?></span>
-                <a href="<?= site_url('rally') ?>">Rallyen</a>
+                <a href="<?= site_url('rally') ?>">Rallys</a>
                 <a href="<?= site_url('auth/logout') ?>">Abmelden</a>
             <?php else: ?>
                 <a href="<?= site_url('auth/login') ?>">Anmelden</a>
@@ -58,9 +58,9 @@
 
         <div class="admin-menu">
             <div class="menu-item">
-                <h3>Rallyen</h3>
-                <p>Verwalten Sie Rallyen</p>
-                <a href="<?= site_url('admin/rallies') ?>">Rallyen verwalten</a>
+                <h3>Rallys</h3>
+                <p>Verwalten Sie Rallys</p>
+                <a href="<?= site_url('admin/rallies') ?>">Rallys verwalten</a>
             </div>
 
 

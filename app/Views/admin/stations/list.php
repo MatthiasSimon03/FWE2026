@@ -1,3 +1,14 @@
+<?php
+if (!isset($rally)) {
+    $rally = ['title' => ''];
+}
+if (!isset($rallyId)) {
+    $rallyId = 0;
+}
+if (!isset($stations)) {
+    $stations = [];
+}
+?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -62,7 +73,7 @@
                         <td><?= $station['order_index'] ?></td>
                         <td class="actions">
                             <a href="<?= site_url('admin/stations/edit/' . $station['id']) ?>">Bearbeiten</a>
-                            <a href="<?= site_url('admin/tasks/create/' . $station['id']) ?>">Aufgaben</a>
+                            <a href="<?= site_url('admin/tasks/' . $station['id']) ?>">Aufgaben verwalten</a>
                             <a href="<?= site_url('admin/stations/delete/' . $station['id']) ?>" onclick="return confirm('Wirklich löschen?');">Löschen</a>
                         </td>
                     </tr>

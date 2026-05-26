@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rallyen - Stadtrallye</title>
+    <title>Rallys - Stadtrallye</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: Arial, sans-serif; background: #f5f5f5; }
@@ -11,7 +11,7 @@
         .navbar a { color: white; text-decoration: none; margin-left: 20px; }
         .navbar a:hover { text-decoration: underline; }
         .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
-        h1 { margin-bottom: 20px; color: #333; }
+        h1 { margin-bottom: 20px; color: #007bff; }
         .rally-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 20px; }
         .rally-card { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
         .rally-card h2 { color: #007bff; margin-bottom: 10px; }
@@ -42,7 +42,7 @@
     </div>
 
     <div class="container">
-        <h1>Verfügbare Rallyen</h1>
+        <h1>Verfügbare Rallys</h1>
 
         <?php if (session()->getFlashdata('success')): ?>
             <div class="alert alert-success">
@@ -65,7 +65,7 @@
             </div>
         <?php else: ?>
             <div class="no-rallies">
-                <p>Keine aktiven Rallyen verfügbar.</p>
+                <p>Keine aktiven Rallys verfügbar.</p>
             </div>
         <?php endif; ?>
     </div>

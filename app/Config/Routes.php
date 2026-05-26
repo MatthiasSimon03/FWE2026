@@ -44,6 +44,7 @@ $routes->get('/admin/stations/edit/(:num)', 'Admin\Stations::edit/$1');
 $routes->post('/admin/stations/edit/(:num)', 'Admin\Stations::edit/$1');
 $routes->get('/admin/stations/delete/(:num)', 'Admin\Stations::delete/$1');
 
+$routes->get('/admin/tasks/(:num)', 'Admin\Tasks::index/$1');
 $routes->get('/admin/tasks/create/(:num)', 'Admin\Tasks::create/$1');
 $routes->post('/admin/tasks/create/(:num)', 'Admin\Tasks::create/$1');
 $routes->get('/admin/tasks/edit/(:num)', 'Admin\Tasks::edit/$1');

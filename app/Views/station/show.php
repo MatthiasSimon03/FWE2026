@@ -1,3 +1,7 @@
+<?php
+$station = $station ?? ['title' => '', 'description' => '', 'tasks' => []];
+/** @var array $station */
+?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -11,7 +15,7 @@
         .navbar a { color: white; text-decoration: none; margin-left: 20px; }
         .navbar a:hover { text-decoration: underline; }
         .container { max-width: 800px; margin: 30px auto; padding: 0 20px; }
-        h1 { color: #333; margin-bottom: 10px; }
+        h1 { color: #007bff; margin-bottom: 10px; }
         .description { color: #666; margin-bottom: 30px; line-height: 1.6; }
         .task-box { background: white; padding: 20px; border-radius: 8px; box-shadow: 0 2px 8px rgba(0,0,0,0.1); margin-bottom: 20px; }
         .task-box h3 { color: #007bff; margin-bottom: 15px; }
@@ -28,6 +32,7 @@
         .back-link { display: inline-block; margin-bottom: 20px; }
         .back-link a { color: #007bff; text-decoration: none; }
         .back-link a:hover { text-decoration: underline; }
+        .solved-note { color: #28a745; font-weight: bold; margin-top: 10px; }
     </style>
 </head>
 <body>
@@ -47,7 +52,7 @@
 
 <div class="container">
     <div class="back-link">
-        <a href="<?= site_url('rally') ?>">← Zurück zu Rallyen</a>
+        <a href="<?= site_url('rally') ?>">← Zurück zu Rallys</a>
     </div>
 
     <h1><?= esc($station['title']) ?></h1>
@@ -78,42 +83,41 @@
             <h3><?= esc($task['text']) ?></h3>
             <p><strong>Punkte:</strong> <?= $task['points'] ?></p>
 
-            <!-- enctype hinzugefügt, damit Datei-Uploads (Fotos) funktionieren -->
-            <form method="post" action="<?= site_url('station/task/' . $task['id'] . '/submit') ?>" enctype="multipart/form-data">
-                <?= csrf_field() ?>
+            <?php if (!empty($task['already_solved'])): ?>
+                <p class="solved-note">✓ Bereits korrekt gelöst</p>
+            <?php else: ?>
+                <form method="post" action="<?= site_url('station/task/' . $task['id'] . '/submit') ?>" enctype="multipart/form-data">
+                    <?= csrf_field() ?>
 
-                <div class="form-group">
-                    <label for="answer_<?= $task['id'] ?>">Ihre Antwort:</label>
+                    <div class="form-group">
+                        <label for="answer_<?= $task['id'] ?>">Ihre Antwort:</label>
 
-                    <?php if ($task['answer_type'] === 'multiple_choice' && !empty($task['meta'])): ?>
-                        <!-- Dropdown für Multiple Choice (aus dem JSON-meta Feld geladen) -->
-                        <?php
-                        $meta = json_decode($task['meta'], true);
-                        $options = $meta['options'] ?? [];
-                        ?>
-                        <select id="answer_<?= $task['id'] ?>" name="answer" required>
-                            <option value="">-- Bitte wählen --</option>
-                            <?php foreach ($options as $option): ?>
-                                <option value="<?= esc($option) ?>"><?= esc($option) ?></option>
-                            <?php endforeach; ?>
-                        </select>
+                        <?php if ($task['answer_type'] === 'multiple_choice' && !empty($task['meta'])): ?>
+                            <?php
+                            $meta = json_decode($task['meta'], true);
+                            $options = $meta['options'] ?? [];
+                            ?>
+                            <select id="answer_<?= $task['id'] ?>" name="answer" required>
+                                <option value="">-- Bitte wählen --</option>
+                                <?php foreach ($options as $option): ?>
+                                    <option value="<?= esc($option) ?>"><?= esc($option) ?></option>
+                                <?php endforeach; ?>
+                            </select>
 
-                    <?php elseif ($task['answer_type'] === 'photo'): ?>
-                        <!-- Foto-Upload-Feld -->
-                        <input type="file" id="answer_<?= $task['id'] ?>" name="photo" accept="image/*" required>
+                        <?php elseif ($task['answer_type'] === 'photo'): ?>
+                            <input type="file" id="answer_<?= $task['id'] ?>" name="photo" accept="image/*" required>
 
-                    <?php elseif ($task['answer_type'] === 'number'): ?>
-                        <!-- Zahlenfeld -->
-                        <input type="number" step="any" id="answer_<?= $task['id'] ?>" name="answer" required placeholder="Zahl eingeben...">
+                        <?php elseif ($task['answer_type'] === 'number'): ?>
+                            <input type="number" step="any" id="answer_<?= $task['id'] ?>" name="answer" required placeholder="Zahl eingeben...">
 
-                    <?php else: ?>
-                        <!-- Standard-Textfeld -->
-                        <input type="text" id="answer_<?= $task['id'] ?>" name="answer" required placeholder="Geben Sie Ihre Antwort ein...">
-                    <?php endif; ?>
-                </div>
+                        <?php else: ?>
+                            <input type="text" id="answer_<?= $task['id'] ?>" name="answer" required placeholder="Geben Sie Ihre Antwort ein...">
+                        <?php endif; ?>
+                    </div>
 
-                <button type="submit">Antwort abgeben</button>
-            </form>
+                    <button type="submit">Antwort abgeben</button>
+                </form>
+            <?php endif; ?>
         </div>
     <?php endforeach; ?>
 </div>

@@ -1,3 +1,4 @@
+<?php $stationId = $stationId ?? 0; $rallyId = $rallyId ?? 0; ?>
 <!DOCTYPE html>
 <html lang="de">
 <head>
@@ -62,7 +63,7 @@
 
             <div class="button-group">
                 <button type="submit">Erstellen</button>
-                <a href="<?= site_url('admin/stations/' . $rallyId) ?>">Abbrechen</a>
+                <a href="<?= site_url('admin/tasks/' . $stationId) ?>">Abbrechen</a>
             </div>
         </form>
     </div>
