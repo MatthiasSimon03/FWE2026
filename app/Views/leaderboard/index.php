@@ -8,14 +8,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Leaderboard - Stadtrallye</title>
+    <link rel="stylesheet" href="<?= base_url('assets/css/custom.css') ?>">
     <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font-family: Arial, sans-serif; background: #f5f5f5; }
-        .navbar { background: #333; color: white; padding: 15px 30px; display: flex; justify-content: space-between; align-items: center; }
-        .navbar a { color: white; text-decoration: none; margin-left: 20px; }
-        .navbar a:hover { text-decoration: underline; }
-        .container { max-width: 1000px; margin: 30px auto; padding: 0 20px; }
-        h1 { color: #007bff; margin-bottom: 20px; }
         .rally-selector { margin-bottom: 30px; }
         .rally-selector label { margin-right: 10px; font-weight: bold; }
         .rally-selector select { padding: 8px; border: 1px solid #ddd; border-radius: 4px; }
@@ -25,9 +19,6 @@
         tr:hover { background: #f9f9f9; }
         .rank { font-weight: bold; color: #007bff; }
         .medal { font-size: 1.2em; }
-        .back-link { display: inline-block; margin-bottom: 20px; }
-        .back-link a { color: #007bff; text-decoration: none; }
-        .back-link a:hover { text-decoration: underline; }
         .no-data { text-align: center; padding: 40px; color: #666; }
     </style>
 </head>
