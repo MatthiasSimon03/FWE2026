@@ -46,11 +46,6 @@ class TaskModel extends Model
                 $correct = mb_strtolower(trim((string)$submittedAnswer)) === mb_strtolower(trim((string)$task['answer']));
                 break;
 
-            case 'photo':
-                // Ein Foto kann nicht automatisiert geprüft werden.
-                // Es gilt als gelöst, sobald eine Datei/Eingabe übertragen wurde.
-                $correct = !empty($submittedAnswer);
-                break;
         }
 
         return [
