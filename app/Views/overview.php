@@ -14,21 +14,27 @@
 <div class="container">
     <h1>Willkommen zur Vorlesung Webentwicklung</h1>
 
-    <div class="overview"
-         <p>Übersicht über die Projekte in der Vorlesung</p>
+    <div class="overview">
+        <p>Übersicht über die Projekte in der Vorlesung</p>
     </div>
 
     <div class="admin-menu">
         <div class="menu-item">
             <h3>🎯 Stadtrally</h3>
             <p>Hier geht es zur Stadtrally, die mit KI entwickelt wurde.</p>
-            <a href="<?= site_url('auth/login') ?>">Zu den Rallys</a>
+            <a href="<?= site_url('stadtrallye/auth/login') ?>">Zum Login der Stadtrally</a>
         </div>
 
         <div class="menu-item">
             <h3>🏆 Tic-Tac-Toe</h3>
             <p>Hier geht es zum entwickelten Spiel Tic-Tac-Toe</p>
             <a href="<?= base_url('tictactoe.html') ?>">Zu Tic Tac Toe</a>
+        </div>
+
+        <div class="menu-item">
+            <h3>🏆 FlightMeet</h3>
+            <p>Hier geht es zur Community-Plattform FlightMeet</p>
+            <a href="<?= base_url('tictactoe.html') ?>">zu FlightMeet</a>
         </div>
     </div>
 </div>

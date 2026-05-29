@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Controllers;
+namespace App\Controllers\Stadtrallye;
 
 use CodeIgniter\HTTP\ResponseInterface;
 
@@ -8,6 +8,7 @@ class Home extends BaseController
 {
     public function index(): ResponseInterface
     {
-        return redirect()->to(base_url('overview'));
+        return redirect()->to(site_url('stadtrallye/rally'));
     }
 }
+

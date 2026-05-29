@@ -82,6 +82,25 @@ app/
     └── admin/...                   # Admin-Interface
 ```
 
+### Separater Namespace für die Stadtrallye
+
+Die Stadtrallye-App ist nun zusätzlich unter dem Namespace `App\Controllers\Stadtrallye` strukturiert und über den URL-Prefix `/stadtrallye` erreichbar.
+
+Wichtige Einstiegspunkte:
+- `stadtrallye/rally`
+- `stadtrallye/station/{id}`
+- `stadtrallye/leaderboard`
+- `stadtrallye/auth/login`
+- `stadtrallye/auth/register`
+- `stadtrallye/admin`
+
+Neue Klassen liegen unter:
+- `app/Controllers/Stadtrallye/`
+- `app/Controllers/Stadtrallye/Admin/`
+- `app/Models/Stadtrallye/`
+
+Die bestehende Stadtrallye-Logik bleibt damit parallel zur bisherigen App verfügbar und kann später schrittweise vollständig in diesen Namespace migriert werden.
+
 ## 🎯 Nächste Schritte zum Erweitern
 
 ### 1. Mehr Rallyen & Stationen hinzufügen
