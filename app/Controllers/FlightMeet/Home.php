@@ -2,6 +2,7 @@
 
 namespace App\Controllers\FlightMeet;
 
+use App\Models\FlightMeet\MeetupModel;
 use CodeIgniter\HTTP\ResponseInterface;
 
 class Home extends BaseController
@@ -16,9 +17,12 @@ class Home extends BaseController
 
     public function meetups(): ResponseInterface
     {
+        $meetupModel = new MeetupModel();
+
         return $this->response->setBody(view('FlightMeet/meetups', [
             'title' => 'FlightMeet - Flugtreffen',
             'active' => 'meetups',
+            'meetups' => $meetupModel->getAllMeetups(),
         ]));
     }
 
