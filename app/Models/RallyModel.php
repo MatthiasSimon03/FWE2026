@@ -30,4 +30,3 @@ class RallyModel extends Model
         return $rally;
     }
 }
-

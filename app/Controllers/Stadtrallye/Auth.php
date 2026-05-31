@@ -38,7 +38,7 @@ class Auth extends BaseController
             }
 
             if ($this->userModel->createUser($name, $email, $password)) {
-                return redirect()->to(site_url('stadtrallye/auth/login'))->with('success', 'Registrierung erfolgreich! Bitte melden Sie sich an.');
+                return redirect()->to('stadtrallye/auth/login')->with('success', 'Registrierung erfolgreich! Bitte melden Sie sich an.');
             }
 
             return redirect()->back()->withInput()->with('error', 'Registrierung fehlgeschlagen. Versuchen Sie es später erneut.');
@@ -63,7 +63,7 @@ class Auth extends BaseController
                     'email' => $user['email'],
                     'role' => $user['role']
                 ]);
-                return redirect()->to(site_url('stadtrallye/rally'))->with('success', 'Anmeldung erfolgreich!');
+                return redirect()->to('stadtrallye/rally')->with('success', 'Anmeldung erfolgreich!');
             }
 
             return redirect()->back()->withInput()->with('error', 'E-Mail oder Passwort ist falsch.');
@@ -75,6 +75,6 @@ class Auth extends BaseController
     public function logout()
     {
         session()->destroy();
-        return redirect()->to(site_url('stadtrallye/rally'))->with('success', 'Abmeldung erfolgreich.');
+        return redirect()->to('stadtrallye/rally')->with('success', 'Abmeldung erfolgreich.');
     }
 }

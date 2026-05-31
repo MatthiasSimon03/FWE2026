@@ -8,6 +8,6 @@ class Home extends BaseController
 {
     public function index(): ResponseInterface
     {
-        return redirect()->to(base_url('overview'));
+        return redirect()->to(site_url('overview'));
     }
 }

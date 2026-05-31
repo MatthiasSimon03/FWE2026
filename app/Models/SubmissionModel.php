@@ -32,9 +32,9 @@ class SubmissionModel extends Model
     public function hasCorrectSubmission($userId, $taskId)
     {
         return $this->where('user_id', $userId)
-                    ->where('task_id', $taskId)
-                    ->where('is_correct', 1)
-                    ->first() !== null;
+                ->where('task_id', $taskId)
+                ->where('is_correct', 1)
+                ->first() !== null;
     }
 
     public function getUserScoreForRally($userId, $rallyId)

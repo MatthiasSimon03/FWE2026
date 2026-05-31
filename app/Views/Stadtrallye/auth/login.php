@@ -22,7 +22,7 @@
             </div>
         <?php endif; ?>
 
-        <form method="post" action="<?= site_url('stadtrallye/auth/login') ?>">
+        <form method="post" action="<?= base_url('stadtrallye/auth/login') ?>">
             <?= csrf_field() ?>
 
             <div class="form-group">
@@ -39,7 +39,7 @@
         </form>
 
         <div class="link-group">
-            <p>Noch nicht registriert? <a href="<?= site_url('stadtrallye/auth/register') ?>">Hier registrieren</a></p>
+            <p>Noch nicht registriert? <a href="<?= base_url('stadtrallye/auth/register') ?>">Hier registrieren</a></p>
         </div>
     </div>
 </body>

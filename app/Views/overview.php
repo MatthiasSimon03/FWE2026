@@ -22,7 +22,7 @@
         <div class="menu-item">
             <h3>🎯 Stadtrally</h3>
             <p>Hier geht es zur Stadtrally, die mit KI entwickelt wurde.</p>
-            <a href="<?= site_url('stadtrallye/auth/login') ?>">Zum Login der Stadtrally</a>
+            <a href="<?= base_url('stadtrallye/auth/login') ?>">Zum Login der Stadtrally</a>
         </div>
 
         <div class="menu-item">
@@ -34,7 +34,7 @@
         <div class="menu-item">
             <h3>🏆 FlightMeet</h3>
             <p>Hier geht es zur Community-Plattform FlightMeet</p>
-            <a href="<?= base_url('tictactoe.html') ?>">zu FlightMeet</a>
+            <a href="<?= base_url('flightmeet') ?>">zu FlightMeet</a>
         </div>
     </div>
 </div>

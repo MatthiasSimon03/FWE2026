@@ -40,4 +40,3 @@ class UserModel extends Model
         return password_verify($password, $user['password_hash']) ? $user : false;
     }
 }
-

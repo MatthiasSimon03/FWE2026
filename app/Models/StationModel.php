@@ -28,4 +28,3 @@ class StationModel extends Model
         return $station;
     }
 }
-
