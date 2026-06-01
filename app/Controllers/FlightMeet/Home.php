@@ -18,11 +18,19 @@ class Home extends BaseController
     public function meetups(): ResponseInterface
     {
         $meetupModel = new MeetupModel();
+        $filters = [
+            'q' => (string) ($this->request->getGet('q') ?? ''),
+            'region' => (string) ($this->request->getGet('region') ?? ''),
+            'level' => (string) ($this->request->getGet('level') ?? ''),
+        ];
+        $options = $meetupModel->getFilterOptions();
 
         return $this->response->setBody(view('FlightMeet/meetups', [
             'title' => 'FlightMeet - Flugtreffen',
             'active' => 'meetups',
-            'meetups' => $meetupModel->getAllMeetups(),
+            'meetups' => $meetupModel->getMeetups($filters),
+            'filters' => $filters,
+            'options' => $options,
         ]));
     }
 
