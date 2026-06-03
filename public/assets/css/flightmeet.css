@@ -38,11 +38,134 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 0; color: #1f2933; }
 .fm-status--abgesagt { background: #fee2e2; color: #b91c1c; }
 .fm-status--abgeschlossen { background: #f3f4f6; color: #4b5563; }
 
-.fm-table-wrapper { overflow-x: auto; border: 1px solid #e4e8f0; border-radius: 10px; }
-.fm-table { width: 100%; border-collapse: collapse; min-width: 720px; }
-.fm-table th, .fm-table td { padding: 12px 10px; text-align: left; border-bottom: 1px solid #e4e8f0; }
-.fm-table th { background: #f8fafc; font-weight: 600; }
-.fm-table tr:last-child td { border-bottom: none; }
+
+.fm-table-wrapper {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid #e4e8f0;
+  border-radius: 10px;
+  background: #fff;
+}
+
+.fm-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.85rem;
+}
+
+.fm-table th, .fm-table td {
+  padding: 15px 10px;
+  text-align: left;
+  vertical-align: middle;
+  border-bottom: 1px solid #edf2f7;
+}
+
+.fm-table th {
+  white-space: nowrap;
+  background: #f8fafc;
+  font-weight: 600;
+  font-size: 0.85rem;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: #64748b;
+}
+
+.fm-table tbody tr:hover {
+  background-color: #f8fafc;
+  transition: background-color 0.15s ease-in-out;
+}
+
+.fm-table tr:last-child td {
+  border-bottom: none;
+}
+
+.fm-table__title {
+  font-weight: 600;
+  color: #1e293b;
+}
+
+/* Die Begrenzung der Beschreibung */
+.fm-table__desc {
+  max-width: 280px;
+  font-size: 0.9rem;
+  color: #64748b;
+  line-height: 1.4;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* Verhindert das Stauchen bei wichtigen Spalten */
+.fm-table td:nth-child(5), /* Datum */
+.fm-table td:nth-child(6), /* Uhrzeit */
+.fm-table td:nth-child(7), /* Erfahrungslevel */
+.fm-table td:nth-child(8), /* Teilnehmende */
+.fm-table td:nth-child(9)  /* Status */ {
+  white-space: nowrap;
+}
+
+.fm-table__date {
+  font-variant-numeric: tabular-nums;
+  color: #334155;
+}
+
+.fm-table__time {
+  color: #64748b;
+  font-size: 0.9rem;
+}
+
+.fm-table__participants {
+  font-variant-numeric: tabular-nums;
+  color: #334155;
+}
+
+.fm-slash {
+  color: #94a3b8;
+  margin: 0 2px;
+}
+
+/* Badges */
+.fm-badge-region {
+  background: #f1f5f9;
+  color: #475569;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-size: 0.85rem;
+}
+
+.fm-badge-level {
+  display: inline-block;
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border-radius: 6px;
+  font-weight: 500;
+}
+
+.fm-badge-level--einsteiger {
+  background-color: #f0fdf4;
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+
+.fm-badge-level--profi {
+  background-color: #fef2f2;
+  color: #991b1b;
+  border: 1px solid #fecaca;
+}
+
+.fm-badge-level--fortgeschritten {
+  background-color: #fffbeb;
+  color: #92400e;
+  border: 1px solid #fef3c7;
+}
+
+.fm-table__empty {
+  text-align: center !important;
+  color: #64748b;
+  padding: 32px !important;
+}
 
 .fm-view-toggle { display: inline-flex; gap: 8px; margin: 12px 0 4px; padding: 6px; border-radius: 999px; background: #f1f5f9; }
 .fm-toggle-btn { border: none; background: transparent; padding: 8px 14px; border-radius: 999px; cursor: pointer; color: #475569; font-weight: 600; }
@@ -56,4 +179,29 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 0; color: #1f2933; }
 .fm-field__label { font-size: 0.85rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.03em; }
 .fm-field__input { border: 1px solid #cfd6e4; border-radius: 8px; padding: 10px 12px; font-size: 0.95rem; }
 .fm-empty { margin: 0; padding: 12px 0; color: #6b7280; }
+
+.fm-icon { width: 30px; height: 30px; object-fit: contain; }
+
+.footer { width: 100%; background-color: #000; color: #fff; text-align: center; padding: 12px 0; display: flex; justify-content: center; align-items: center; }
+
+.footer p {
+  margin: 0;
+  font-size: 14px;
+}
+
+html,
+body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
 

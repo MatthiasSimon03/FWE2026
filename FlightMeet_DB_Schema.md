@@ -24,6 +24,7 @@ Speichert die Registrierungs- und Profildaten der Pilotinnen und Piloten.
 | `username` | `VARCHAR(50)` | `NOT NULL`, `UNIQUE` | Eindeutiger Benutzername. |
 | `email` | `VARCHAR(100)` | `NOT NULL`, `UNIQUE` | Eindeutige E-Mail-Adresse. |
 | `password_hash` | `VARCHAR(255)` | `NOT NULL` | Gehashtes Passwort für die Authentifizierung. |
+| `role` | `ENUM('user', 'admin')` | `DEFAULT 'user'` | Benutzerrolle für Berechtigungen. |
 | `experience_level` | `ENUM('Einsteiger', 'Fortgeschritten', 'Profi')` | `NOT NULL` | Vordefiniertes Erfahrungslevel des Piloten. |
 | `created_at` | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP` | Registrierungszeitpunkt. |
 | `updated_at` | `TIMESTAMP` | `DEFAULT ... ON UPDATE ...` | Letzte Profilaktualisierung. |
@@ -56,21 +57,22 @@ Verknüpft Benutzer mit Gruppen (n:m-Beziehung).
 ### 2.4. `fm_flight_meets` (Flugtreffen)
 Enthält alle Details zu den geplanten Flugaktivitäten.
 
-| Spaltenname | Datentyp                                                     | Einschränkung | Beschreibung |
-| :--- |:-------------------------------------------------------------| :--- | :--- |
-| `id` | `INT`                                                        | `PRIMARY KEY`, `AUTO_INCREMENT` | Eindeutige ID des Flugtreffens. |
-| `creator_id` | `INT`                                                        | `NOT NULL`, `FOREIGN KEY` | Referenziert den Ersteller in `fm_users(id)`. |
-| `title` | `VARCHAR(150)`                                               | `NOT NULL` | Name/Titel des Flugtreffens. |
-| `location` | `VARCHAR(150)`                                               | `NOT NULL` | Der konkrete Flugspot (Start-/Landeplatz). |
-| `region` | `VARCHAR(100)`                                               | `NOT NULL` | Region zur einfacheren Filterung. |
-| `meet_date` | `DATE`                                                       | `NOT NULL` | Datum des Treffens. |
-| `meet_time` | `TIME`                                                       | `NOT NULL` | Uhrzeit des Treffens. |
-| `experience_level` | `ENUM('Einsteiger', 'Fortgeschritten', 'Profi')`             | `NOT NULL` | Mindestanforderung an die Teilnehmenden. |
-| `max_participants` | `INT`                                                        | `NOT NULL` | Maximale Anzahl erlaubter Piloten. |
-| `description` | `TEXT`                                                       | `NOT NULL` | Detailbeschreibung des Treffens. |
-| `status` | `ENUM('geplant', 'ausgebucht', 'abgesagt', 'abgeschlossen')` | `DEFAULT 'geplant'` | Aktueller Status des Treffens. |
-| `created_at` | `TIMESTAMP`                                                  | `DEFAULT CURRENT_TIMESTAMP` | Erstellungszeitpunkt. |
-| `updated_at` | `TIMESTAMP`                                                  | `DEFAULT ... ON UPDATE ...` | Letzte Änderung des Treffens. |
+| Spaltenname | Datentyp                                                     | Einschränkung | Beschreibung                                                                |
+| :--- |:-------------------------------------------------------------| :--- |:----------------------------------------------------------------------------|
+| `id` | `INT`                                                        | `PRIMARY KEY`, `AUTO_INCREMENT` | Eindeutige ID des Flugtreffens.                                             |
+| `creator_id` | `INT`                                                        | `NOT NULL`, `FOREIGN KEY` | Referenziert den Ersteller in `fm_users(id)`.                               |
+ | `creator_is_private` | `BOOLEAN` | `NOT NULL` | Gibt an, ob der Ersteller anonym bleiben möchte (0: öffentlich, 1: privat). |
+| `title` | `VARCHAR(150)`                                               | `NOT NULL` | Name/Titel des Flugtreffens.                                                |
+| `location` | `VARCHAR(150)`                                               | `NOT NULL` | Der konkrete Flugspot (Start-/Landeplatz).                                  |
+| `region` | `VARCHAR(100)`                                               | `NOT NULL` | Region zur einfacheren Filterung.                                           |
+| `meet_date` | `DATE`                                                       | `NOT NULL` | Datum des Treffens.                                                         |
+| `meet_time` | `TIME`                                                       | `NOT NULL` | Uhrzeit des Treffens.                                                       |
+| `experience_level` | `ENUM('Einsteiger', 'Fortgeschritten', 'Profi')`             | `NOT NULL` | Mindestanforderung an die Teilnehmenden.                                    |
+| `max_participants` | `INT`                                                        | `NOT NULL` | Maximale Anzahl erlaubter Piloten.                                          |
+| `description` | `TEXT`                                                       | `NOT NULL` | Detailbeschreibung des Treffens.                                            |
+| `status` | `ENUM('geplant', 'ausgebucht', 'abgesagt', 'abgeschlossen')` | `DEFAULT 'geplant'` | Aktueller Status des Treffens.                                              |
+| `created_at` | `TIMESTAMP`                                                  | `DEFAULT CURRENT_TIMESTAMP` | Erstellungszeitpunkt.                                                       |
+| `updated_at` | `TIMESTAMP`                                                  | `DEFAULT ... ON UPDATE ...` | Letzte Änderung des Treffens.                                               |
 
 ---
 

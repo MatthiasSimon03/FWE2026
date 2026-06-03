@@ -83,11 +83,11 @@
                         </div>
                         <div>
                             <dt>Datum</dt>
-                                <dd><?= esc($meetup['meet_date']) ?></dd>
+                            <dd><?= date('d.m.Y', strtotime($meetup['meet_date'])) ?></dd>
                         </div>
                         <div>
                             <dt>Uhrzeit</dt>
-                                <dd><?= esc($meetup['meet_time']) ?></dd>
+                            <dd><?= date('H:i', strtotime($meetup['meet_time'])) ?> Uhr</dd>
                         </div>
                         <div>
                             <dt>Erfahrungslevel</dt>
@@ -115,29 +115,47 @@
                 <th>Region</th>
                 <th>Beschreibung</th>
                 <th>Datum</th>
-                <th>Uhrzeit</th>
-                <th>Erfahrungslevel</th>
-                <th>Teilnehmende</th>
+                <th>Zeit</th>
+                <th>Level</th>
+                <th>Anzahl</th>
                 <th>Status</th>
             </tr>
             </thead>
             <tbody>
             <?php if ($meetups === []): ?>
                 <tr>
-                    <td colspan="9">Keine Flugtreffen für die aktuellen Filter gefunden.</td>
+                    <td colspan="9" class="fm-table__empty">Keine Flugtreffen für die aktuellen Filter gefunden.</td>
                 </tr>
             <?php else: ?>
                 <?php foreach ($meetups as $meetup): ?>
                     <tr>
-                        <td><?= esc($meetup['title']) ?></td>
+                        <td class="fm-table__title"><?= esc($meetup['title']) ?></td>
                         <td><?= esc($meetup['location']) ?></td>
-                        <td><?= esc($meetup['region']) ?></td>
-                        <td><?= esc($meetup['description']) ?></td>
-                        <td><?= esc($meetup['meet_date']) ?></td>
-                        <td><?= esc($meetup['meet_time']) ?></td>
-                        <td><?= esc($meetup['experience_level']) ?></td>
-                        <td><?= esc($meetup['participants_count'] ?? 0) ?> / <?= esc($meetup['max_participants']) ?></td>
-                        <td><?= esc($meetup['status']) ?></td>
+                        <td><span class="fm-badge-region"><?= esc($meetup['region']) ?></span></td>
+                        <td>
+                            <div class="fm-table__desc" title="<?= esc($meetup['description']) ?>">
+                                <?= esc($meetup['description']) ?>
+                            </div>
+                        </td>
+                        <td class="fm-table__date">
+                            <?= date('d.m.Y', strtotime($meetup['meet_date'])) ?>
+                        </td>
+                        <td class="fm-table__time">
+                            <?= date('H:i', strtotime($meetup['meet_time'])) ?>
+                        </td>
+                        <td>
+                            <span class="fm-badge-level fm-badge-level--<?= esc(strtolower($meetup['experience_level'])) ?>">
+                                <?= esc($meetup['experience_level']) ?>
+                            </span>
+                        </td>
+                        <td class="fm-table__participants">
+                            <strong><?= esc($meetup['participants_count'] ?? 0) ?></strong> <span class="fm-slash">/</span> <?= esc($meetup['max_participants']) ?>
+                        </td>
+                        <td>
+                            <span class="fm-status fm-status--<?= esc($meetup['status']) ?>">
+                                <?= esc($meetup['status']) ?>
+                            </span>
+                        </td>
                     </tr>
                 <?php endforeach; ?>
             <?php endif; ?>

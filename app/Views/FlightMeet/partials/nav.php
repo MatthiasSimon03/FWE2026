@@ -1,6 +1,9 @@
 <nav class="fm-nav" aria-label="Hauptnavigation">
     <div class="fm-brand">
-        <a class="fm-logo" href="<?= base_url('flightmeet') ?>">FlightMeet</a>
+        <a class="fm-logo" href="<?= base_url('flightmeet') ?>">
+            <img src="<?= base_url('assets/icons/gliderIcon.png') ?>" alt="Icon" class="fm-icon">
+            FlightMeet
+        </a>
         <button class="fm-toggle" id="fmMenuToggle" type="button" aria-expanded="false" aria-controls="fmMenu">
             Menü
         </button>
