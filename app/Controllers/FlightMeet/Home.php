@@ -22,7 +22,11 @@ class Home extends BaseController
             'q' => (string) ($this->request->getGet('q') ?? ''),
             'region' => (string) ($this->request->getGet('region') ?? ''),
             'level' => (string) ($this->request->getGet('level') ?? ''),
+            'status' => ($this->request->getGet('status') ?? []),
         ];
+        if (!is_array($filters['status'])) {
+            $filters['status'] = [];
+        }
         $options = $meetupModel->getFilterOptions();
 
         return $this->response->setBody(view('FlightMeet/meetups', [
@@ -31,6 +35,18 @@ class Home extends BaseController
             'meetups' => $meetupModel->getMeetups($filters),
             'filters' => $filters,
             'options' => $options,
+        ]));
+    }
+
+    public function meetupDetail(int $id): ResponseInterface
+    {
+        $meetupModel = new MeetupModel();
+        $meetup = $meetupModel->getMeetupById($id);
+
+        return $this->response->setBody(view('FlightMeet/meetupDetail', [
+            'title' => 'FlightMeet - Detail',
+            'active' => 'meetups',
+            'meetup' => $meetup,
         ]));
     }
 

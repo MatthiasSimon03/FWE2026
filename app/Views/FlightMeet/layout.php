@@ -11,7 +11,6 @@
 <header>
     <?= view('FlightMeet/partials/nav', ['active' => $active ?? 'home']) ?>
 </header>
-
 <main class="container">
     <?= $this->renderSection('content') ?>
 </main>

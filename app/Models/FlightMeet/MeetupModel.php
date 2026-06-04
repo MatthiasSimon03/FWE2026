@@ -20,6 +20,9 @@ class MeetupModel extends Model
         'max_participants',
         'description',
         'status',
+        'creator_is_private',
+        'longitude',
+        'latitude',
     ];
 
     public function getMeetups(array $filters): array
@@ -27,12 +30,14 @@ class MeetupModel extends Model
         $search = isset($filters['q']) ? trim((string) $filters['q']) : '';
         $region = isset($filters['region']) ? trim((string) $filters['region']) : '';
         $level = isset($filters['level']) ? trim((string) $filters['level']) : '';
+        $status = $filters['status'] ?? [];
+        $status = array_values(array_filter($status, static fn($s) => $s !== ''));  // Entferne leere Werte
 
         $builder = $this->db->table($this->table . ' fm');
         $builder
             ->select(
                 'fm.id, fm.title, fm.location, fm.region, fm.description, fm.meet_date, fm.meet_time, '
-                . 'fm.experience_level, fm.max_participants, fm.status, '
+                . 'fm.experience_level, fm.creator_is_private, fm.max_participants, fm.status, '
                 . 'COUNT(p.user_id) AS participants_count'
             )
             ->join('fm_flight_meet_participants p', 'p.flight_meet_id = fm.id', 'left')
@@ -46,6 +51,10 @@ class MeetupModel extends Model
             $builder->where('fm.experience_level', $level);
         }
 
+        if (is_array($status) && $status !== []) {
+            $builder->whereIn('fm.status', $status);
+        }
+
         if ($search !== '') {
             $builder
                 ->groupStart()
@@ -57,6 +66,35 @@ class MeetupModel extends Model
         }
 
         return $builder->get()->getResultArray();
+    }
+
+    public function getMeetupById(int $id): array
+    {
+        $builder = $this->db->table($this->table . ' fm');
+        $builder
+            ->select(
+                'fm.id, fm.title, fm.location, fm.region, fm.description, fm.meet_date, fm.meet_time, 
+                 fm.experience_level, fm.creator_is_private, fm.max_participants,
+                 COUNT(p.user_id) AS participants_count'
+            )
+            ->join('fm_flight_meet_participants p', 'p.flight_meet_id = fm.id')
+            ->where('fm.id', $id)
+            ->groupBy('fm.id');
+
+        $meetup = $builder->get()->getRowArray();
+
+        $participants = $this->db->table('fm_flight_meet_participants mp')
+            ->select('u.id, u.username')
+            ->join('fm_users u', 'u.id = mp.user_id')
+            ->where('mp.flight_meet_id', $id)
+            ->orderBy('u.username')
+            ->get()
+            ->getResultArray();
+
+        $meetup['participants'] = $participants ?? [];
+        $meetup['free_slots'] = max(0, (int)$meetup['max_participants'] - (int)$meetup['participants_count']);
+
+        return $meetup ?: [];
     }
 
     public function getFilterOptions(): array
@@ -81,5 +119,7 @@ class MeetupModel extends Model
             'levels' => $levels,
         ];
     }
+
+
 }
 

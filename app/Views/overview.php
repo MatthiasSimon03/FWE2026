@@ -34,7 +34,7 @@
         <div class="menu-item">
             <h3>🏆 FlightMeet</h3>
             <p>Hier geht es zur Community-Plattform FlightMeet</p>
-            <a href="<?= base_url('flightmeet') ?>">zu FlightMeet</a>
+            <a href="<?= base_url('flightmeet/auth/login') ?>">zu FlightMeet</a>
         </div>
     </div>
 </div>

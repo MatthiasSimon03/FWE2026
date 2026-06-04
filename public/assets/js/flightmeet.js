@@ -29,14 +29,30 @@ const setActiveView = (view) => {
 	});
 };
 
+const isMobile = window.matchMedia('(max-width: 768px)').matches;
 const storedView = localStorage.getItem(VIEW_STORAGE_KEY) || 'cards';
-setActiveView(storedView);
+const initialView = isMobile ? 'cards' : storedView;
+setActiveView(initialView);
 
 viewButtons.forEach((button) => {
 	button.addEventListener('click', () => {
 		const view = button.dataset.view || 'cards';
-		localStorage.setItem(VIEW_STORAGE_KEY, view);
-		setActiveView(view);
+		const nextView = window.matchMedia('(max-width: 768px)').matches ? 'cards' : view;
+		localStorage.setItem(VIEW_STORAGE_KEY, nextView);
+		setActiveView(nextView);
 	});
 });
 
+document.querySelectorAll('input[data-auto-submit="status"]').forEach((checkbox) => {
+	checkbox.addEventListener('change', () => {
+		const form = checkbox.closest('form');
+		if (form) {
+			form.requestSubmit();
+		}
+	});
+});
+
+if (window.matchMedia('(max-width: 768px)').matches) {
+	const cardsBtn = document.querySelector('.fm-toggle-btn[data-view="cards"]');
+	if (cardsBtn) cardsBtn.click();
+}

@@ -22,6 +22,12 @@
         <li class="<?= ($active ?? '') === 'chat' ? 'active' : '' ?>">
             <a href="<?= base_url('flightmeet/chat') ?>">Chat</a>
         </li>
+        <li class="fm-menu-form">
+            <form method="post" action="<?= site_url('flightmeet/auth/logout') ?>">
+                <?= csrf_field() ?>
+                <button type="submit" class="fm-logout-btn">Abmelden</button>
+            </form>
+        </li>
     </ul>
 </nav>
 

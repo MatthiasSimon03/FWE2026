@@ -1,5 +1,4 @@
 <?= $this->extend('FlightMeet/layout') ?>
-
 <?= $this->section('content') ?>
 <h1>Flugtreffen</h1>
 <p class="lead">
@@ -9,6 +8,8 @@
 <?php $meetups = $meetups ?? []; ?>
 <?php $filters = $filters ?? ['q' => '', 'region' => '', 'level' => '']; ?>
 <?php $options = $options ?? ['regions' => [], 'levels' => []]; ?>
+<?php $selectedStatus = $filters['status'] ?? []; ?>
+<?php $statusOptions = ['geplant', 'ausgebucht', 'abgeschlossen', 'abgesagt'] ?>
 
 <form class="fm-filter" method="get" action="<?= base_url('flightmeet/meetups') ?>">
     <div class="fm-filter__row">
@@ -51,6 +52,20 @@
     <div class="fm-filter__actions">
         <button class="btn" type="submit">Filtern</button>
         <a class="btn btn-secondary" href="<?= base_url('flightmeet/meetups') ?>">Zurücksetzen</a>
+        <div class="fm-checkbox-group">
+            <?php foreach ($statusOptions as $status): ?>
+                <label class="fm-checkbox">
+                    <input
+                            type="checkbox"
+                            name="status[]"
+                            value="<?= esc($status) ?>"
+                            data-auto-submit="status"
+                            <?= in_array($status, $selectedStatus, true) ? 'checked' : '' ?>
+                    >
+                    <span><?= esc(ucfirst($status)) ?></span>
+                </label>
+            <?php endforeach; ?>
+        </div>
     </div>
 </form>
 
@@ -60,13 +75,12 @@
 </div>
 
 <section class="fm-section" id="fmCardsView">
-    <h2>Kartenansicht</h2>
     <?php if ($meetups === []): ?>
         <p class="fm-empty">Keine Flugtreffen für die aktuellen Filter gefunden.</p>
     <?php else: ?>
         <div class="fm-grid">
             <?php foreach ($meetups as $meetup): ?>
-                <article class="fm-card">
+                <a class="fm-card fm-card--link" href="<?= base_url('flightmeet/meetups/' . $meetup['id']) ?>">
                     <header class="fm-card__header">
                         <h3><?= esc($meetup['title']) ?></h3>
                         <span class="fm-status fm-status--<?= esc($meetup['status']) ?>"><?= esc($meetup['status']) ?></span>
@@ -98,27 +112,26 @@
                                 <dd><?= esc($meetup['participants_count'] ?? 0) ?> / <?= esc($meetup['max_participants']) ?></dd>
                         </div>
                     </dl>
-                </article>
+                </a>
             <?php endforeach; ?>
         </div>
     <?php endif; ?>
 </section>
 
 <section class="fm-section" id="fmTableView">
-    <h2>Tabellenansicht</h2>
     <div class="fm-table-wrapper">
         <table class="fm-table">
             <thead>
             <tr>
-                <th>Titel</th>
-                <th>Flugspot</th>
-                <th>Region</th>
-                <th>Beschreibung</th>
-                <th>Datum</th>
-                <th>Zeit</th>
-                <th>Level</th>
-                <th>Anzahl</th>
-                <th>Status</th>
+                <th class="col-title">Titel</th>
+                <th class="col-spot">Flugspot</th>
+                <th class="col-region">Region</th>
+                <th class="col-desc">Beschreibung</th>
+                <th class="col-date">Datum</th>
+                <th class="col-time">Zeit</th>
+                <th class="col-level">Level</th>
+                <th class="col-count">Anzahl</th>
+                <th class="col-status">Status</th>
             </tr>
             </thead>
             <tbody>
@@ -128,31 +141,35 @@
                 </tr>
             <?php else: ?>
                 <?php foreach ($meetups as $meetup): ?>
-                    <tr>
-                        <td class="fm-table__title"><?= esc($meetup['title']) ?></td>
-                        <td><?= esc($meetup['location']) ?></td>
-                        <td><span class="fm-badge-region"><?= esc($meetup['region']) ?></span></td>
+                    <tr class ="fm-row-link">
+                        <td class="fm-row-link__cell">
+                            <a class="fm-row-link__anchor" href="<?= base_url('flightmeet/meetups/' . $meetup['id']) ?>">
+                                <?= esc($meetup['title']) ?>
+                            </a>
+                        </td>
+                        <td class="col-spot"><?= esc($meetup['location']) ?></td>
+                        <td><span class="fm-badge-region col-region"><?= esc($meetup['region']) ?></span></td>
                         <td>
-                            <div class="fm-table__desc" title="<?= esc($meetup['description']) ?>">
+                            <div class="fm-table__desc col-desc" title="<?= esc($meetup['description']) ?>">
                                 <?= esc($meetup['description']) ?>
                             </div>
                         </td>
-                        <td class="fm-table__date">
+                        <td class="fm-table__date col-date">
                             <?= date('d.m.Y', strtotime($meetup['meet_date'])) ?>
                         </td>
-                        <td class="fm-table__time">
+                        <td class="fm-table__time col-time">
                             <?= date('H:i', strtotime($meetup['meet_time'])) ?>
                         </td>
                         <td>
-                            <span class="fm-badge-level fm-badge-level--<?= esc(strtolower($meetup['experience_level'])) ?>">
+                            <span class="fm-badge-level col-level fm-badge-level--<?= esc(strtolower($meetup['experience_level'])) ?>">
                                 <?= esc($meetup['experience_level']) ?>
                             </span>
                         </td>
-                        <td class="fm-table__participants">
+                        <td class="fm-table__participants col-count">
                             <strong><?= esc($meetup['participants_count'] ?? 0) ?></strong> <span class="fm-slash">/</span> <?= esc($meetup['max_participants']) ?>
                         </td>
                         <td>
-                            <span class="fm-status fm-status--<?= esc($meetup['status']) ?>">
+                            <span class="fm-status col-status fm-status--<?= esc($meetup['status']) ?>">
                                 <?= esc($meetup['status']) ?>
                             </span>
                         </td>

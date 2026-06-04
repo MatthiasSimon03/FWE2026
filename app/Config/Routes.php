@@ -16,6 +16,13 @@ $routes->group('flightmeet', ['namespace' => 'App\\Controllers\\FlightMeet'], st
 	$routes->get('meetups', 'Home::meetups');
 	$routes->get('groups', 'Home::groups');
 	$routes->get('chat', 'Home::chat');
+    $routes->get('meetups/(:num)', 'Home::meetupDetail/$1');
+
+    $routes->get('auth/login', 'Auth::login');
+    $routes->post('auth/login', 'Auth::login');
+    $routes->get('auth/register', 'Auth::register');
+    $routes->post('auth/register', 'Auth::register');
+    $routes->post('auth/logout', 'Auth::logout');
 });
 
 
@@ -63,10 +70,5 @@ $routes->group('stadtrallye', ['namespace' => 'App\\Controllers\\Stadtrallye'], 
 	$routes->post('admin/tasks/delete/(:num)', 'Admin\Tasks::delete/$1');
 });
 
-// FlightMeet App (separater Namespace unter /flightmeet)
-$routes->group('flightmeet', ['namespace' => 'App\\Controllers\\FlightMeet'], static function ($routes) {
-    $routes->get('/', 'Home::index');
-    $routes->get('meetups', 'Home::meetups');
-    $routes->get('groups', 'Home::groups');
-});
+
 
