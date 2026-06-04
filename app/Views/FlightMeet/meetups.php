@@ -1,5 +1,12 @@
 <?= $this->extend('FlightMeet/layout') ?>
 <?= $this->section('content') ?>
+
+<?php if (session()->getFlashdata('error')) : ?>
+    <div style="background-color: #f8d7da; color: #721c24; border: 1px solid #f5c6cb; padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+        <?= esc(session()->getFlashdata('error')) ?>
+    </div>
+<?php endif; ?>
+
 <h1>Flugtreffen</h1>
 <p class="lead">
     Entdecke anstehende Flugtreffen und verabrede dich mit anderen Interessierten.

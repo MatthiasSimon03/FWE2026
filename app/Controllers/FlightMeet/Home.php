@@ -43,6 +43,13 @@ class Home extends BaseController
         $meetupModel = new MeetupModel();
         $meetup = $meetupModel->getMeetupById($id);
 
+        if ($meetup === null) {
+            return redirect()
+                ->to('/flightmeet/meetups')
+                ->with('error', 'Flugtreffen wurde nicht gefunden.');
+        }
+
+
         return $this->response->setBody(view('FlightMeet/meetupDetail', [
             'title' => 'FlightMeet - Detail',
             'active' => 'meetups',
@@ -63,6 +70,14 @@ class Home extends BaseController
         return $this->response->setBody(view('FlightMeet/chat', [
             'title' => 'FlightMeet - Chat',
             'active' => 'chat',
+        ]));
+    }
+
+    public function profile(): ResponseInterface
+    {
+        return $this->response->setBody(view('FlightMeet/profile', [
+            'title' => 'FlightMeet - Profil',
+            'active' => 'profile',
         ]));
     }
 }

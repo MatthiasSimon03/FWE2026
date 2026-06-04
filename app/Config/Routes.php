@@ -16,6 +16,7 @@ $routes->group('flightmeet', ['filter' => 'fm_auth', 'namespace' => 'App\Control
     $routes->get('meetups', 'Home::meetups');
     $routes->get('groups', 'Home::groups');
     $routes->get('chat', 'Home::chat');
+    $routes->get('profile', 'Home::profile');
     $routes->get('meetups/(:num)', 'Home::meetupDetail/$1');
 });
 

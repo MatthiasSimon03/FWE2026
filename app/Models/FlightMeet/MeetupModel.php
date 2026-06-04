@@ -37,7 +37,7 @@ class MeetupModel extends Model
         $builder
             ->select(
                 'fm.id, fm.title, fm.location, fm.region, fm.description, fm.meet_date, fm.meet_time, '
-                . 'fm.experience_level, fm.creator_is_private, fm.max_participants, fm.status, '
+                . 'fm.experience_level, fm.creator_is_private, fm.max_participants, fm.status, fm.longitude, fm.latitude, '
                 . 'COUNT(p.user_id) AS participants_count'
             )
             ->join('fm_flight_meet_participants p', 'p.flight_meet_id = fm.id', 'left')
@@ -68,21 +68,29 @@ class MeetupModel extends Model
         return $builder->get()->getResultArray();
     }
 
-    public function getMeetupById(int $id): array
+    public function getMeetupById(int $id): ?array
     {
         $builder = $this->db->table($this->table . ' fm');
         $builder
             ->select(
-                'fm.id, fm.title, fm.location, fm.region, fm.description, fm.meet_date, fm.meet_time, 
-                 fm.experience_level, fm.creator_is_private, fm.max_participants,
-                 COUNT(p.user_id) AS participants_count'
+                'fm.id, fm.title, fm.location, fm.region, fm.description, fm.meet_date, fm.meet_time, '
+                . 'fm.experience_level, fm.creator_is_private, fm.max_participants, fm.status, fm.longitude, fm.latitude, '
+                . 'COUNT(p.user_id) AS participants_count',
+                false // Deaktiviert das automatische Escaping für die COUNT-Funktion
             )
-            ->join('fm_flight_meet_participants p', 'p.flight_meet_id = fm.id')
+            ->join('fm_flight_meet_participants p', 'p.flight_meet_id = fm.id', 'left') // Hier 'left' hinzugefügt!
             ->where('fm.id', $id)
             ->groupBy('fm.id');
 
         $meetup = $builder->get()->getRowArray();
 
+        // Falls das Treffen nicht existiert (z.B. falsche ID übergeben):
+        if (!$meetup) {
+            // Hier Fehlerbehandlung einbauen (z. B. 404-Fehler werfen, Redirect oder return null)
+            return null;
+        }
+
+        // Erst wenn sichergestellt ist, dass $meetup existiert, Teilnehmer laden:
         $participants = $this->db->table('fm_flight_meet_participants mp')
             ->select('u.id, u.username')
             ->join('fm_users u', 'u.id = mp.user_id')
@@ -91,7 +99,7 @@ class MeetupModel extends Model
             ->get()
             ->getResultArray();
 
-        $meetup['participants'] = $participants ?? [];
+        $meetup['participants'] = $participants;
         $meetup['free_slots'] = max(0, (int)$meetup['max_participants'] - (int)$meetup['participants_count']);
 
         return $meetup ?: [];
