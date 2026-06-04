@@ -10,14 +10,17 @@ $routes->get('/', 'Home::index');
 $routes->get('overview', 'OverviewController::index');
 
 
-// FlightMeet App (separater Namespace unter /flightmeet)
-$routes->group('flightmeet', ['namespace' => 'App\\Controllers\\FlightMeet'], static function ($routes) {
-	$routes->get('/', 'Home::index');
-	$routes->get('meetups', 'Home::meetups');
-	$routes->get('groups', 'Home::groups');
-	$routes->get('chat', 'Home::chat');
+// FlightMeet App
+$routes->group('flightmeet', ['filter' => 'fm_auth', 'namespace' => 'App\Controllers\FlightMeet'], static function ($routes) {
+    $routes->get('/', 'Home::index');
+    $routes->get('meetups', 'Home::meetups');
+    $routes->get('groups', 'Home::groups');
+    $routes->get('chat', 'Home::chat');
     $routes->get('meetups/(:num)', 'Home::meetupDetail/$1');
+});
 
+// FlightMeet Login (ohne Filter, der Zugriff schützt
+$routes->group('flightmeet', ['namespace' => 'App\\Controllers\\FlightMeet'], static function ($routes) {
     $routes->get('auth/login', 'Auth::login');
     $routes->post('auth/login', 'Auth::login');
     $routes->get('auth/register', 'Auth::register');
@@ -27,7 +30,7 @@ $routes->group('flightmeet', ['namespace' => 'App\\Controllers\\FlightMeet'], st
 
 
 
-// Stadtrallye App (separater Namespace unter /stadtrallye)
+// Stadtrallye App
 $routes->group('stadtrallye', ['namespace' => 'App\\Controllers\\Stadtrallye'], static function ($routes) {
 	$routes->get('/', 'Home::index');
 

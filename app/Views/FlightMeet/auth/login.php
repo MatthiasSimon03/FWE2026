@@ -35,6 +35,13 @@
             <input type="password" id="password" name="password" required>
         </div>
 
+        <div class="form-group fm-checkbox-wrapper" style="margin-top: 12px;">
+            <label class="fm-checkbox" style="border: none; background: transparent; padding: 0;">
+                <input type="checkbox" name="remember_me" value="1">
+                <span>Eingeloggt bleiben</span>
+            </label>
+        </div>
+
         <button type="submit">Anmelden</button>
     </form>
 

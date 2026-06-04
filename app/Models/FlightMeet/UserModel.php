@@ -41,4 +41,31 @@ class UserModel extends Model
         }
         return password_verify($password, $user['password_hash']) ? $user : false;
     }
+
+    public function saveRememberToken(int $userId, string $tokenHash, string $expiresAt)
+    {
+        return $this->db->table('fm_remember_tokens')->insert([
+            'user_id'    => $userId,
+            'token_hash' => $tokenHash,
+            'expires_at' => $expiresAt
+        ]);
+    }
+
+    public function getValidRememberToken(int $userId, string $tokenHash)
+    {
+        return $this->db->table('fm_remember_tokens')
+            ->where('user_id', $userId)
+            ->where('token_hash', $tokenHash)
+            ->where('expires_at >', date('Y-m-d H:i:s'))
+            ->get()
+            ->getRowArray();
+    }
+
+    public function deleteRememberToken(int $userId, string $tokenHash)
+    {
+        return $this->db->table('fm_remember_tokens')
+            ->where('user_id', $userId)
+            ->where('token_hash', $tokenHash)
+            ->delete();
+    }
 }

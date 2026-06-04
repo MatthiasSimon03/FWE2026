@@ -101,6 +101,20 @@ Diese Tabelle speichert alle Chat-Nachrichten des Systems. Über Fremdschlüssel
 | `flight_meet_id` | `INT` | `NULL`, `FOREIGN KEY` | Referenziert `fm_flight_meets(id)`. |
 | `created_at` | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP` | Sendezeitpunkt. |
 
+---
+
+### 2.7 `fm_remember_tokens` (Token für "Angemeldet bleiben")
+Diese Tabelle speichert die Tokens für die Funktion "Angemeldet bleiben" (Remember Me)
+
+| Spaltenname  | Datentyp | Einschränkung | Beschreibung |
+|:-------------| :--- | :--- | :--- |
+| `id`         | `INT` | `PRIMARY KEY`, `AUTO_INCREMENT` | Eindeutige ID des Tokens. |
+| `user_id`    | `INT` | `NOT NULL`, `FOREIGN KEY` | Referenziert den Nutzer in `fm_users(id)`. |
+| `token_hash` | `VARCHAR(255)` | `NOT NULL` | Gehashtes Token für die Authentifizierung. |
+| `expires_at` | `DATETIME` | `NOT NULL` | Ablaufzeitpunkt des Tokens. |
+
+---
+
 #### Datenintegrität über CHECK-Constraint:
 Ein SQL-Constraint (`chk_fm_chat_context`) stellt sicher, dass eine Nachricht immer nur einem einzigen Kontext zugeordnet ist:
 * **Globaler Chat:** `group_id` und `flight_meet_id` sind beide `NULL`.

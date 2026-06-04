@@ -22,6 +22,9 @@
         <li class="<?= ($active ?? '') === 'chat' ? 'active' : '' ?>">
             <a href="<?= base_url('flightmeet/chat') ?>">Chat</a>
         </li>
+        <li class="<?= ($active ?? '') === 'profile' ? 'active' : '' ?>">
+            <a href="<?= base_url('flightmeet/profile') ?>">Profil</a>
+        </li>
         <li class="fm-menu-form">
             <form method="post" action="<?= site_url('flightmeet/auth/logout') ?>">
                 <?= csrf_field() ?>
