@@ -57,7 +57,7 @@
     </div>
 
     <div class="fm-filter__actions">
-        <button class="btn" type="submit">Filtern</button>
+        <button class="btn" type="submit"> Filtern</button>
         <a class="btn btn-secondary" href="<?= base_url('flightmeet/meetups') ?>">Zurücksetzen</a>
         <div class="fm-checkbox-group">
             <?php foreach ($statusOptions as $status): ?>
@@ -133,7 +133,7 @@
                 <th class="col-title">Titel</th>
                 <th class="col-spot">Flugspot</th>
                 <th class="col-region">Region</th>
-                <th class="col-desc">Beschreibung</th>
+                <!-- <th class="col-desc">Beschreibung</th> --!>
                 <th class="col-date">Datum</th>
                 <th class="col-time">Zeit</th>
                 <th class="col-level">Level</th>
@@ -156,11 +156,13 @@
                         </td>
                         <td class="col-spot"><?= esc($meetup['location']) ?></td>
                         <td><span class="fm-badge-region col-region"><?= esc($meetup['region']) ?></span></td>
+                        <!--
                         <td>
                             <div class="fm-table__desc col-desc" title="<?= esc($meetup['description']) ?>">
                                 <?= esc($meetup['description']) ?>
                             </div>
                         </td>
+                        --!>
                         <td class="fm-table__date col-date">
                             <?= date('d.m.Y', strtotime($meetup['meet_date'])) ?>
                         </td>

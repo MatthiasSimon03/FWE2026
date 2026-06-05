@@ -1,21 +1,239 @@
-body { font-family: Arial, sans-serif; margin: 0; padding: 0; color: #1f2933; }
-.container { max-width: 960px; margin: 60px auto; padding: 0 20px; margin-top: 24px; }
-.lead { font-size: 1.1rem; color: #444; }
-.actions { margin-top: 24px; display: flex; gap: 12px; flex-wrap: wrap; }
-.btn { padding: 12px 18px; background: #1e88e5; color: #fff; text-decoration: none; border-radius: 6px; display: inline-block; }
-.btn-secondary { background: #546e7a; }
-.card { background: #f7f9fc; border: 1px solid #e4e8f0; padding: 16px; border-radius: 8px; }
+/* ==========================================================================
+   1. DESIGN-SYSTEM (CSS-VARIABLEN)
+   ========================================================================== */
+:root {
+  /* Globale Schriftart */
+  --font-family: 'Inter', sans-serif;
 
-.fm-nav { display: flex; justify-content: space-between; align-items: center; gap: 16px; padding: 16px 20px; border-bottom: 1px solid #e4e8f0; background: #fff; position: sticky; top: 0; z-index: 10; }
-.fm-brand { display: flex; align-items: center; gap: 12px; }
-.fm-logo { font-weight: 700; text-decoration: none; color: #1f2933; font-size: 1.1rem; }
-.fm-menu { list-style: none; display: flex; gap: 16px; padding: 0; margin: 0; }
-.fm-menu a { text-decoration: none; color: #1f2933; padding: 6px 8px; border-radius: 6px; }
-.fm-menu li.active a { background: #e7f0ff; color: #1e88e5; font-weight: 600; }
-.fm-toggle { display: none; border: 1px solid #cfd6e4; background: #fff; padding: 6px 10px; border-radius: 6px; cursor: pointer; }
-.fm-menu-form form { display: flex; align-items: center; margin: 0; padding: 0; }
-.fm-logout-btn { background: transparent; border: none; padding: 0px 0px; font-family: inherit; font-weight: bold;
-  font-size: inherit; color: #1f2933; cursor: pointer; border-radius: 6px; transition: all 0.15s ease-in-out; }
+  /* Marken- & Akzentfarben */
+  --color-primary: #1e88e5;
+  --color-primary-hover: #1565c0;
+  --color-primary-light: #e7f0ff;
+  --color-secondary: #546e7a;
+  --color-secondary-hover: #e2e8f0;
+
+  /* Textfarben */
+  --color-text-main: #1f2933;
+  --color-text-title: #1e293b;
+  --color-text-lead: #444444;
+  --color-text-muted-dark: #4b5563;
+  --color-text-muted: #64748b;
+  --color-text-muted-light: #6b7280;
+  --color-text-sidebar: #475569;
+  --color-text-dark: #334155;
+  --color-text-slash: #94a3b8;
+
+  /* Hintergrundfarben */
+  --color-bg-white: #ffffff;
+  --color-bg-card: #f7f9fc;
+  --color-bg-light: #f8fafc;
+  --color-bg-badge: #f1f5f9;
+  --color-bg-checkbox-active: #e7f0ff;
+
+  /* Rahmenfarben (Borders) */
+  --color-border-card: #e4e8f0;
+  --color-border-light: #edf2f7;
+  --color-border-field: #cfd6e4;
+  --color-border-medium: #e2e8f0;
+
+  /* Status-Farben */
+  --color-status-geplant: #1e88e5;
+  --color-status-geplant-bg: #e7f0ff;
+  --color-status-aktiv: #15803d;
+  --color-status-aktiv-bg: #e6f9f0;
+  --color-status-ausgebucht: #b45309;
+  --color-status-ausgebucht-bg: #fff3cd;
+  --color-status-abgesagt: #b91c1c;
+  --color-status-abgesagt-bg: #fee2e2;
+  --color-status-abgeschlossen: #4b5563;
+  --color-status-abgeschlossen-bg: #f3f4f6;
+
+  /* Level-Farben (Badges) */
+  --color-level-einsteiger: #166534;
+  --color-level-einsteiger-bg: #f0fdf4;
+  --color-level-einsteiger-border: #bbf7d0;
+
+  --color-level-profi: #991b1b;
+  --color-level-profi-bg: #fef2f2;
+  --color-level-profi-border: #fecaca;
+
+  --color-level-fortgeschritten: #92400e;
+  --color-level-fortgeschritten-bg: #fffbeb;
+  --color-level-fortgeschritten-border: #fef3c7;
+}
+
+/* ==========================================================================
+   2. BASIS-STYLES & LAYOUT
+   ========================================================================== */
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: var(--font-family);
+  padding: 0;
+  color: var(--color-text-main);
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+main {
+  flex: 1;
+}
+
+.container {
+  max-width: 960px;
+  margin: 60px auto;
+  padding: 0 20px;
+  margin-top: 24px;
+}
+
+.lead {
+  font-size: 1.1rem;
+  color: var(--color-text-lead);
+}
+
+/* ==========================================================================
+   3. BUTTONS & AKTIONEN
+   ========================================================================== */
+.actions {
+  margin-top: 24px;
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+/* Gemeinsame Button-Eigenschaften gebündelt */
+.btn,
+.btn-primary-full,
+.btn-secondary-full {
+  padding: 12px 18px;
+  border-radius: 6px;
+  text-decoration: none;
+  font-family: inherit;
+  font-size: 0.95rem;
+  font-weight: 600;
+  box-sizing: border-box;
+  text-align: center;
+}
+
+.btn {
+  background: var(--color-primary);
+  color: #fff;
+  display: inline-block;
+}
+
+.btn-secondary {
+  background: var(--color-secondary);
+}
+
+/* Spezial-Buttons für die Sidebar (Volle Breite) */
+.btn-primary-full {
+  width: 100%;
+  background: var(--color-primary);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-primary-full:hover {
+  background: var(--color-primary-hover);
+}
+
+.btn-secondary-full {
+  width: 100%;
+  background: var(--color-bg-badge);
+  color: var(--color-text-sidebar);
+  border: 1px solid var(--color-border-medium);
+  cursor: pointer;
+  display: inline-block;
+}
+
+.btn-secondary-full:hover {
+  background: var(--color-secondary-hover);
+  color: var(--color-text-main);
+}
+
+/* ==========================================================================
+   4. NAVIGATION (HEADER) & FOOTER
+   ========================================================================== */
+.fm-nav {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  border-bottom: 1px solid var(--color-border-card);
+  background: var(--color-bg-white);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.fm-brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.fm-logo {
+  font-weight: 700;
+  text-decoration: none;
+  color: var(--color-text-main);
+  font-size: 1.1rem;
+}
+
+.fm-menu {
+  list-style: none;
+  display: flex;
+  gap: 16px;
+  padding: 0;
+  margin: 0;
+}
+
+.fm-menu a {
+  text-decoration: none;
+  color: var(--color-text-main);
+  padding: 6px 8px;
+  border-radius: 6px;
+}
+
+.fm-menu li.active a {
+  background: var(--color-primary-light);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+.fm-toggle {
+  display: none;
+  border: 1px solid var(--color-border-field);
+  background: var(--color-bg-white);
+  padding: 6px 10px;
+  border-radius: 6px;
+  cursor: pointer;
+}
+
+.fm-menu-form form {
+  display: flex;
+  align-items: center;
+  margin: 0;
+  padding: 0;
+}
+
+.fm-logout-btn {
+  background: transparent;
+  border: none;
+  padding: 0;
+  font-family: inherit;
+  font-weight: bold;
+  font-size: inherit;
+  color: var(--color-text-main);
+  cursor: pointer;
+  border-radius: 6px;
+  transition: all 0.15s ease-in-out;
+}
 
 @media (max-width: 768px) {
   .fm-nav { flex-direction: column; align-items: stretch; }
@@ -28,29 +246,141 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 0; color: #1f2933; }
   .fm-view-toggle { display: none; }
 }
 
-.fm-section { margin-top: 32px; }
-.fm-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 16px; }
-.fm-card { border: 1px solid #e4e8f0; border-radius: 10px; padding: 16px; background: #fff; display: flex; flex-direction: column; gap: 12px; }
-.fm-card__header { display: flex; justify-content: space-between; align-items: flex-start; gap: 12px; }
-.fm-card__header h3 { margin: 0; font-size: 1.05rem; }
-.fm-card__desc { margin: 0; color: #4b5563; font-size: 0.95rem; }
-.fm-card__meta { margin: 0; display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; }
-.fm-card__meta dt { font-size: 0.8rem; text-transform: uppercase; color: #6b7280; }
-.fm-card__meta dd { margin: 2px 0 0 0; font-weight: 600; }
-.fm-status { font-size: 0.8rem; padding: 4px 8px; border-radius: 999px; text-transform: capitalize; background: #eef2f7; }
-.fm-status--geplant { background: #e7f0ff; color: #1e88e5; }
-.fm-status--aktiv { background: #e6f9f0; color: #15803d; }
-.fm-status--ausgebucht { background: #fff3cd; color: #b45309; }
-.fm-status--abgesagt { background: #fee2e2; color: #b91c1c; }
-.fm-status--abgeschlossen { background: #f3f4f6; color: #4b5563; }
+.footer {
+  width: 100%;
+  background-color: #000;
+  color: #fff;
+  text-align: center;
+  padding: 12px 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
 
+.footer p {
+  margin: 0;
+  font-size: 14px;
+}
 
+/* ==========================================================================
+   5. RASTER-GRID & KARTEN (CARDS)
+   ========================================================================== */
+.card {
+  background: var(--color-bg-card);
+  border: 1px solid var(--color-border-card);
+  padding: 16px;
+  border-radius: 8px;
+}
+
+.fm-section {
+  margin-top: 32px;
+}
+
+.fm-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+}
+
+.fm-card {
+  border: 1px solid var(--color-border-card);
+  border-radius: 10px;
+  padding: 16px;
+  background: var(--color-bg-white);
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.fm-card--link {
+  text-decoration: none;
+  color: inherit;
+}
+
+.fm-card--link:hover {
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+  transform: translateY(-1px);
+}
+
+.fm-card__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.fm-card__header h3 {
+  margin: 0;
+  font-size: 1.05rem;
+}
+
+.fm-card__desc {
+  margin: 0;
+  color: var(--color-text-muted-dark);
+  font-size: 0.95rem;
+}
+
+.fm-card__meta {
+  margin: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: 12px;
+}
+
+.fm-card__meta dt {
+  font-size: 0.8rem;
+  text-transform: uppercase;
+  color: var(--color-text-muted-light);
+}
+
+.fm-card__meta dd {
+  margin: 2px 0 0 0;
+  font-weight: 600;
+}
+
+/* Status-Abzeichen (Pills) */
+.fm-status {
+  font-size: 0.8rem;
+  padding: 4px 8px;
+  border-radius: 999px;
+  text-transform: capitalize;
+  background: #eef2f7;
+}
+
+.fm-status--geplant {
+  background: var(--color-status-geplant-bg);
+  color: var(--color-status-geplant);
+}
+
+.fm-status--aktiv {
+  background: var(--color-status-aktiv-bg);
+  color: var(--color-status-aktiv);
+}
+
+.fm-status--ausgebucht {
+  background: var(--color-status-ausgebucht-bg);
+  color: var(--color-status-ausgebucht);
+}
+
+.fm-status--abgesagt {
+  background: var(--color-status-abgesagt-bg);
+  color: var(--color-status-abgesagt);
+}
+
+.fm-status--abgeschlossen {
+  background: var(--color-status-abgeschlossen-bg);
+  color: var(--color-status-abgeschlossen);
+}
+
+/* ==========================================================================
+   6. TABELLEN-STYLES (TABELLENANSICHT)
+   ========================================================================== */
 .fm-table-wrapper {
   width: 100%;
   overflow-x: auto;
-  border: 1px solid #e4e8f0;
+  border: 1px solid var(--color-border-card);
   border-radius: 10px;
-  background: #fff;
+  background: var(--color-bg-white);
 }
 
 .fm-table {
@@ -63,21 +393,21 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 0; color: #1f2933; }
   padding: 15px 10px;
   text-align: left;
   vertical-align: middle;
-  border-bottom: 1px solid #edf2f7;
+  border-bottom: 1px solid var(--color-border-light);
 }
 
 .fm-table th {
   white-space: nowrap;
-  background: #f8fafc;
+  background: var(--color-bg-light);
   font-weight: 600;
   font-size: 0.85rem;
   text-transform: uppercase;
   letter-spacing: 0.05em;
-  color: #64748b;
+  color: var(--color-text-muted);
 }
 
 .fm-table tbody tr:hover {
-  background-color: #f8fafc;
+  background-color: var(--color-bg-light);
   transition: background-color 0.15s ease-in-out;
 }
 
@@ -87,14 +417,13 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 0; color: #1f2933; }
 
 .fm-table__title {
   font-weight: 600;
-  color: #1e293b;
+  color: var(--color-text-title);
 }
 
-/* Die Begrenzung der Beschreibung */
 .fm-table__desc {
   max-width: 280px;
   font-size: 0.9rem;
-  color: #64748b;
+  color: var(--color-text-muted);
   line-height: 1.4;
   display: -webkit-box;
   -webkit-line-clamp: 3;
@@ -103,7 +432,6 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 0; color: #1f2933; }
   text-overflow: ellipsis;
 }
 
-/* Verhindert das Stauchen bei wichtigen Spalten */
 .fm-table td:nth-child(5), /* Datum */
 .fm-table td:nth-child(6), /* Uhrzeit */
 .fm-table td:nth-child(7), /* Erfahrungslevel */
@@ -114,28 +442,205 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 0; color: #1f2933; }
 
 .fm-table__date {
   font-variant-numeric: tabular-nums;
-  color: #334155;
+  color: var(--color-text-dark);
 }
 
 .fm-table__time {
-  color: #64748b;
+  color: var(--color-text-muted);
   font-size: 0.9rem;
 }
 
 .fm-table__participants {
   font-variant-numeric: tabular-nums;
-  color: #334155;
+  color: var(--color-text-dark);
 }
 
 .fm-slash {
-  color: #94a3b8;
+  color: var(--color-text-slash);
   margin: 0 2px;
 }
 
-/* Badges */
+.fm-table__empty {
+  text-align: center !important;
+  color: var(--color-text-muted);
+  padding: 32px !important;
+}
+
+.fm-row-link {
+  position: relative;
+}
+
+.fm-row-link__anchor::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+}
+
+.fm-row-link__anchor {
+  color: inherit;
+  text-decoration: none;
+  font-weight: bold;
+}
+
+/* ==========================================================================
+   7. FILTER-KOMPONENTEN & FORMULARE
+   ========================================================================== */
+
+
+.fm-view-toggle {
+  display: inline-flex;
+  gap: 8px;
+  margin: 12px 0 4px;
+  padding: 6px;
+  border-radius: 999px;
+  background: var(--color-bg-badge);
+}
+
+.fm-toggle-btn {
+  border: none;
+  background: transparent;
+  padding: 8px 14px;
+  border-radius: 999px;
+  cursor: pointer;
+  color: var(--color-text-sidebar);
+  font-weight: 600;
+}
+
+.fm-toggle-btn.is-active {
+  background: var(--color-primary);
+  color: #fff;
+}
+
+.fm-view-hidden {
+  display: none;
+}
+
+.fm-filter {
+  margin: 20px 0 8px;
+  padding: 16px;
+  border: 1px solid var(--color-border-card);
+  border-radius: 12px;
+  background: var(--color-bg-white);
+}
+
+.fm-filter__row {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 16px;
+}
+
+.fm-filter__actions {
+  display: flex;
+  gap: 12px;
+  margin-top: 16px;
+  flex-wrap: wrap;
+}
+
+.fm-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.fm-field__label {
+  font-size: 0.85rem;
+  color: var(--color-text-muted-light);
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+}
+
+.fm-field__input {
+  border: 1px solid var(--color-border-field);
+  border-radius: 8px;
+  padding: 10px 12px;
+  font-size: 0.95rem;
+}
+
+.fm-empty {
+  margin: 0;
+  padding: 12px 0;
+  color: var(--color-text-muted-light);
+}
+
+.fm-icon {
+  width: 30px;
+  height: 30px;
+  object-fit: contain;
+}
+
+/* Checkbox-Gruppe */
+.fm-checkbox-group {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px 14px;
+}
+
+.fm-checkbox {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 10px;
+  border: 1px solid var(--color-border-medium);
+  border-radius: 999px;
+  background: var(--color-bg-white);
+  cursor: pointer;
+  font-size: 0.9rem;
+  transition: all 0.15s ease;
+}
+
+.fm-checkbox input[type="checkbox"] {
+  appearance: none;
+  width: 16px;
+  height: 16px;
+  border: 2px solid var(--color-text-slash);
+  border-radius: 4px;
+  display: inline-grid;
+  place-content: center;
+  background: var(--color-bg-white);
+  transition: all 0.15s ease;
+}
+
+.fm-checkbox input[type="checkbox"]::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  transform: scale(0);
+  transition: transform 0.12s ease-in-out;
+  box-shadow: inset 1em 1em var(--color-primary);
+}
+
+.fm-checkbox input[type="checkbox"]:checked {
+  border-color: var(--color-primary);
+  background: var(--color-bg-checkbox-active);
+}
+
+.fm-checkbox input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
+.fm-checkbox:hover {
+  border-color: #cbd5e1;
+  background: var(--color-bg-light);
+}
+
+.fm-checkbox input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--color-primary);
+  outline-offset: 2px;
+}
+
+.fm-checkbox:has(input[type="checkbox"]:checked) {
+  border-color: var(--color-primary);
+  background: var(--color-bg-checkbox-active);
+  color: var(--color-primary);
+  font-weight: 600;
+}
+
+/* ==========================================================================
+   8. VISUELLE ABZEICHEN (BADGES)
+   ========================================================================== */
 .fm-badge-region {
-  background: #f1f5f9;
-  color: #475569;
+  background: var(--color-bg-badge);
+  color: var(--color-text-sidebar);
   padding: 4px 8px;
   border-radius: 6px;
   font-size: 0.85rem;
@@ -150,124 +655,46 @@ body { font-family: Arial, sans-serif; margin: 0; padding: 0; color: #1f2933; }
 }
 
 .fm-badge-level--einsteiger {
-  background-color: #f0fdf4;
-  color: #166534;
-  border: 1px solid #bbf7d0;
+  background-color: var(--color-level-einsteiger-bg);
+  color: var(--color-level-einsteiger);
+  border: 1px solid var(--color-level-einsteiger-border);
 }
 
 .fm-badge-level--profi {
-  background-color: #fef2f2;
-  color: #991b1b;
-  border: 1px solid #fecaca;
+  background-color: var(--color-level-profi-bg);
+  color: var(--color-level-profi);
+  border: 1px solid var(--color-level-profi-border);
 }
 
 .fm-badge-level--fortgeschritten {
-  background-color: #fffbeb;
-  color: #92400e;
-  border: 1px solid #fef3c7;
+  background-color: var(--color-level-fortgeschritten-bg);
+  color: var(--color-level-fortgeschritten);
+  border: 1px solid var(--color-level-fortgeschritten-border);
 }
 
-.fm-table__empty {
-  text-align: center !important;
-  color: #64748b;
-  padding: 32px !important;
-}
-
-.fm-view-toggle { display: inline-flex; gap: 8px; margin: 12px 0 4px; padding: 6px; border-radius: 999px; background: #f1f5f9; }
-.fm-toggle-btn { border: none; background: transparent; padding: 8px 14px; border-radius: 999px; cursor: pointer; color: #475569; font-weight: 600; }
-.fm-toggle-btn.is-active { background: #1e88e5; color: #fff; }
-.fm-view-hidden { display: none; }
-
-.fm-filter { margin: 20px 0 8px; padding: 16px; border: 1px solid #e4e8f0; border-radius: 12px; background: #fff; }
-.fm-filter__row { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
-.fm-filter__actions { display: flex; gap: 12px; margin-top: 16px; flex-wrap: wrap; }
-.fm-field { display: flex; flex-direction: column; gap: 6px; }
-.fm-field__label { font-size: 0.85rem; color: #6b7280; text-transform: uppercase; letter-spacing: 0.03em; }
-.fm-field__input { border: 1px solid #cfd6e4; border-radius: 8px; padding: 10px 12px; font-size: 0.95rem; }
-.fm-empty { margin: 0; padding: 12px 0; color: #6b7280; }
-
-.fm-icon { width: 30px; height: 30px; object-fit: contain; }
-
-.footer { width: 100%; background-color: #000; color: #fff; text-align: center; padding: 12px 0; display: flex; justify-content: center; align-items: center; }
-
-.footer p {
-  margin: 0;
-  font-size: 14px;
-}
-
-html, body { height: 100%; margin: 0; }
-body { min-height: 100vh; display: flex; flex-direction: column; }
-main { flex: 1; }
-
-.fm-checkbox-group { display: flex; flex-wrap: wrap; gap: 10px 14px; }
-
-.fm-checkbox { display: inline-flex; align-items: center; gap: 8px; padding: 6px 10px; border: 1px solid #e2e8f0;
-  border-radius: 999px; background: #fff; cursor: pointer; font-size: 0.9rem; transition: all 0.15s ease; }
-
-.fm-checkbox input[type="checkbox"] { appearance: none; width: 16px; height: 16px; border: 2px solid #94a3b8;
-  border-radius: 4px; display: inline-grid; place-content: center; background: #fff; transition: all 0.15s ease; }
-
-.fm-checkbox input[type="checkbox"]::before {
-  content: "";
-  width: 8px;
-  height: 8px;
-  transform: scale(0);
-  transition: transform 0.12s ease-in-out;
-  box-shadow: inset 1em 1em #1e88e5;
-}
-
-.fm-checkbox input[type="checkbox"]:checked {
-  border-color: #1e88e5;
-  background: #e7f0ff;
-}
-
-.fm-checkbox input[type="checkbox"]:checked::before {
-  transform: scale(1);
-}
-
-.fm-checkbox:hover {
-  border-color: #cbd5e1;
-  background: #f8fafc;
-}
-
-.fm-checkbox input[type="checkbox"]:focus-visible {
-  outline: 2px solid #1e88e5;
-  outline-offset: 2px;
-}
-
-.fm-checkbox:has(input[type="checkbox"]:checked) {
-  border-color: #1e88e5;
-  background: #e7f0ff;
+.icons-meetup-detail {
+  font-size: 32px;
   color: #1e88e5;
-  font-weight: 600;
-}
-
-.fm-card--link { text-decoration: none; color: inherit; }
-.fm-card--link:hover { box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08); transform: translateY(-1px); }
-
-.fm-row-link { position: relative; }
-.fm-row-link__anchor::after { content: ""; position: absolute; inset: 0; }
-.fm-row-link__anchor { color: inherit; text-decoration: none; font-weight: bold}
-#map { width: 100%; max-width: 100%; height: 250px; border-radius: 12px; border: 1px solid #e2e8f0; box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
-  margin-top: 10px; margin-bottom: 25px; z-index: 1; }
-
-@media (min-width: 576px) {
-  #map {
-    height: 350px;
-  }
-}
-
-@media (min-width: 992px) {
-  #map {
-    height: 450px;
-  }
 }
 
 /* ==========================================================================
-   Erweiterung für die Detailansicht (FlightMeet Details)
+   9. INTERAKTIVE KARTEN-KOMPONENTE (MAP)
    ========================================================================== */
+#map {
+  width: 100%;
+  max-width: 100%;
+  height: 250px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border-medium);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  margin-top: 10px;
+  margin-bottom: 25px;
+  z-index: 1;
+}
 
-/* Grid-Layout für die Detailseite */
+/* ==========================================================================
+   10. DETAILED EVENT VIEW (FLUGTREFFEN DETAILSEITE)
+   ========================================================================== */
 .fm-detail-layout {
   display: grid;
   grid-template-columns: 1fr;
@@ -275,42 +702,33 @@ main { flex: 1; }
   margin-top: 24px;
 }
 
-/* Ab 992px (Desktop) wird das Layout zweispaltig */
-@media (min-width: 992px) {
-  .fm-detail-layout {
-    grid-template-columns: 1.7fr 1.3fr;
-    align-items: start;
-  }
-}
-
 .fm-detail-title {
   font-size: 2.1rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--color-text-title);
   margin-top: 0;
   margin-bottom: 12px;
 }
 
 .fm-detail-desc {
   line-height: 1.6;
-  color: #4b5563;
+  color: var(--color-text-muted-dark);
   margin-bottom: 32px;
 }
 
 .fm-section-title {
   font-size: 1.25rem;
-  color: #1e293b;
+  color: var(--color-text-title);
   margin-top: 24px;
   margin-bottom: 16px;
-  border-bottom: 2px solid #edf2f7;
+  border-bottom: 2px solid var(--color-border-light);
   padding-bottom: 8px;
 }
 
-/* Detail Card in der Sidebar */
 .fm-detail-card {
-  background: #fff;
+  background: var(--color-bg-white);
   border-radius: 12px;
-  border: 1px solid #e4e8f0;
+  border: 1px solid var(--color-border-card);
   box-shadow: 0 4px 20px rgba(15, 23, 42, 0.03);
   padding: 24px;
 }
@@ -318,12 +736,11 @@ main { flex: 1; }
 .fm-detail-card-title {
   font-size: 1.2rem;
   font-weight: 700;
-  color: #1e293b;
+  color: var(--color-text-title);
   margin-top: 0;
   margin-bottom: 20px;
 }
 
-/* Definitionen für die Metadaten-Liste */
 .fm-detail-info-list {
   display: flex;
   flex-direction: column;
@@ -337,7 +754,7 @@ main { flex: 1; }
   justify-content: space-between;
   align-items: center;
   padding-bottom: 12px;
-  border-bottom: 1px dashed #e2e8f0;
+  border-bottom: 1px dashed var(--color-border-medium);
 }
 
 .fm-detail-info-item:last-of-type {
@@ -347,7 +764,7 @@ main { flex: 1; }
 
 .fm-detail-info-item dt {
   font-size: 0.8rem;
-  color: #64748b;
+  color: var(--color-text-muted);
   text-transform: uppercase;
   letter-spacing: 0.03em;
   margin: 0;
@@ -359,24 +776,22 @@ main { flex: 1; }
   font-size: 0.95rem;
 }
 
-/* Trenner */
 .fm-divider {
   border: 0;
-  border-top: 1px solid #edf2f7;
+  border-top: 1px solid var(--color-border-light);
   margin: 20px 0;
 }
 
-/* Teilnehmerliste */
 .fm-sidebar-subtitle {
   font-size: 0.95rem;
-  color: #475569;
+  color: var(--color-text-sidebar);
   margin-top: 0;
   margin-bottom: 12px;
   font-weight: 600;
 }
 
 .fm-empty-text {
-  color: #94a3b8;
+  color: var(--color-text-slash);
   font-size: 0.9rem;
   font-style: italic;
   margin-bottom: 24px;
@@ -389,8 +804,8 @@ main { flex: 1; }
   display: flex;
   flex-direction: column;
   gap: 8px;
-  max-height: 200px;
-  overflow-y: auto; /* Fallback für sehr viele Teilnehmer */
+  max-height: 180px;
+  overflow-y: auto;
 }
 
 .fm-participants-list li {
@@ -398,9 +813,9 @@ main { flex: 1; }
   align-items: center;
   gap: 10px;
   padding: 8px 12px;
-  background: #f8fafc;
+  background: var(--color-bg-light);
   border-radius: 8px;
-  border: 1px solid #edf2f7;
+  border: 1px solid var(--color-border-light);
 }
 
 .fm-participant-avatar {
@@ -410,10 +825,9 @@ main { flex: 1; }
 .fm-participant-name {
   font-size: 0.9rem;
   font-weight: 500;
-  color: #334155;
+  color: var(--color-text-dark);
 }
 
-/* Sidebar-Buttons in voller Breite */
 .fm-sidebar-actions {
   display: flex;
   flex-direction: column;
@@ -421,42 +835,25 @@ main { flex: 1; }
   margin-top: 20px;
 }
 
-.btn-primary-full {
-  width: 100%;
-  padding: 12px 18px;
-  background: #1e88e5;
-  color: #fff;
-  border: none;
-  font-family: inherit;
-  font-size: 0.95rem;
-  font-weight: 600;
-  border-radius: 6px;
-  cursor: pointer;
-  text-align: center;
-  box-sizing: border-box;
+/* ==========================================================================
+   11. BÜNDELUNG DER MEDIA QUERIES
+   ========================================================================== */
+
+/* Ab 576px (Tablets) */
+@media (min-width: 576px) {
+  #map {
+    height: 350px;
+  }
 }
 
-.btn-primary-full:hover {
-  background: #1565c0;
-}
+/* Ab 992px (Desktop-Bildschirme) */
+@media (min-width: 992px) {
+  #map {
+    height: 450px;
+  }
 
-.btn-secondary-full {
-  width: 100%;
-  padding: 12px 18px;
-  background: #f1f5f9;
-  color: #475569;
-  text-decoration: none;
-  border: 1px solid #e2e8f0;
-  font-family: inherit;
-  font-size: 0.95rem;
-  font-weight: 600;
-  border-radius: 6px;
-  cursor: pointer;
-  text-align: center;
-  box-sizing: border-box;
-}
-
-.btn-secondary-full:hover {
-  background: #e2e8f0;
-  color: #1f2933;
+  .fm-detail-layout {
+    grid-template-columns: 1.7fr 1.3fr;
+    align-items: start;
+  }
 }

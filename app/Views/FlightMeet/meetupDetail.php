@@ -19,20 +19,19 @@
             <div class="fm-detail-card">
                 <h3 class="fm-detail-card-title">Treffen-Details</h3>
 
-                <!-- Strukturierte Liste für Eckdaten -->
                 <dl class="fm-detail-info-list">
                     <div class="fm-detail-info-item">
-                        <dt>Flugspot</dt>
+                        <dt><i class="ph ph-map-pin icons-meetup-detail"></i></dt>
                         <dd><strong><?= esc($meetup['location']) ?></strong></dd>
                     </div>
 
                     <div class="fm-detail-info-item">
-                        <dt>Region</dt>
+                        <dt><i class="ph ph-compass icons-meetup-detail"></i></dt>
                         <dd><span class="fm-badge-region"><?= esc($meetup['region']) ?></span></dd>
                     </div>
 
                     <div class="fm-detail-info-item">
-                        <dt>Datum & Zeit</dt>
+                        <dt><i class="ph ph-calendar-blank icons-meetup-detail"></i></dt>
                         <dd>
                             <span class="fm-table__date"><?= date('d.m.Y', strtotime($meetup['meet_date'])) ?></span>
                             <span class="fm-table__time">um <?= date('H:i', strtotime($meetup['meet_time'])) ?> Uhr</span>
@@ -40,7 +39,7 @@
                     </div>
 
                     <div class="fm-detail-info-item">
-                        <dt>Erfahrungslevel</dt>
+                        <dt><i class="ph ph-medal icons-meetup-detail"></i></dt>
                         <dd>
                             <?php
                             // Erzeugt dynamisch den Klassennamen (z.B. fm-badge-level--einsteiger)
@@ -53,9 +52,13 @@
                     </div>
 
                     <div class="fm-detail-info-item">
-                        <dt>Plätze</dt>
+                        <dt><i class="ph ph-users icons-meetup-detail"></i></dt>
                         <dd>
-                            <?php if ($meetup['free_slots'] <= 0): ?>
+                            <?php if ($meetup['status'] === 'abgesagt'): ?>
+                                <span class="fm-status fm-status--abgesagt">Abgesagt</span>
+                            <?php elseif ($meetup['status'] === 'abgeschlossen'): ?>
+                                <span class="fm-status fm-status--abgeschlossen">Abgeschlossen</span>
+                            <?php elseif ($meetup['free_slots'] <= 0): ?>
                                 <span class="fm-status fm-status--ausgebucht">Ausgebucht</span>
                             <?php else: ?>
                                 <span class="fm-status fm-status--geplant"><?= esc($meetup['free_slots']) ?> Plätze frei</span>
@@ -63,6 +66,16 @@
                         </dd>
                     </div>
                 </dl>
+
+                <hr class="fm-divider">
+
+                <!-- Buttons -->
+                <div class="fm-sidebar-actions">
+                    <?php if ($meetup['status'] === 'geplant'): ?>
+                        <button class="btn btn-primary-full">Teilnehmen</button>
+                    <?php endif; ?>
+                    <a class="btn-secondary-full" href="<?= base_url('flightmeet/meetups') ?>">Zurück zur Übersicht</a>
+                </div>
 
                 <hr class="fm-divider">
 
@@ -80,12 +93,6 @@
                         <?php endforeach; ?>
                     </ul>
                 <?php endif; ?>
-
-                <!-- Buttons -->
-                <div class="fm-sidebar-actions">
-                    <button class="btn btn-primary-full">Teilnehmen</button>
-                    <a class="btn-secondary-full" href="<?= base_url('flightmeet/meetups') ?>">Zurück zur Übersicht</a>
-                </div>
             </div>
         </div>
     </div>

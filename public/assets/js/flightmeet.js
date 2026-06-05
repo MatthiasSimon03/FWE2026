@@ -56,3 +56,5 @@ if (window.matchMedia('(max-width: 768px)').matches) {
 	const cardsBtn = document.querySelector('.fm-toggle-btn[data-view="cards"]');
 	if (cardsBtn) cardsBtn.click();
 }
+
+
