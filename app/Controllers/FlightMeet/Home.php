@@ -107,8 +107,58 @@ class Home extends BaseController
     }
 
     public function createMeetup(): ResponseInterface {
+        $meetupModel = new MeetupModel();
+
+        // 1. Wenn das Formular abgeschickt wurde (POST)
         if ($this->request->is('post')) {
-            return redirect()->to('flightmeet/meetups')->with('success', 'Flugtreffen wurde erfolgreich erstellt (funktioniert noch nicht wirklich).');
+            $creatorId = session()->get('fm_user_id'); // Ersteller-ID aus Session holen
+
+            $title = $this->request->getPost('title');
+            $location = $this->request->getPost('location');
+            $region = $this->request->getPost('region');
+            $meetDate = $this->request->getPost('meet_date');
+            $meetTime = $this->request->getPost('meet_time');
+            $level = $this->request->getPost('experience_level');
+            $maxParticipants = $this->request->getPost('max_participants');
+            $description = $this->request->getPost('description');
+            $creatorIsPrivate = $this->request->getPost('creator_is_private') ? 1 : 0;
+
+            $latitude = $this->request->getPost('latitude') ?: null;
+            $longitude = $this->request->getPost('longitude') ?: null;
+
+            // 2. Einfache Validierung (wie im Auth-Controller)
+            if (empty($title) || empty($location) || empty($region) || empty($meetDate) || empty($meetTime) || empty($level) || empty($maxParticipants) || empty($latitude) || empty($description))  {
+                return redirect()->back()->withInput()->with('error', 'Bitte füllen Sie alle erforderlichen Felder aus.');
+            }
+
+            if ((int)$maxParticipants < 1) {
+                return redirect()->back()->withInput()->with('error', 'Die maximale Teilnehmerzahl muss mindestens 1 betragen.');
+            }
+
+            // 3. Daten für die Insert-Query vorbereiten
+            $data = [
+                'creator_id'         => $creatorId,
+                'creator_is_private' => $creatorIsPrivate,
+                'title'              => $title,
+                'location'           => $location,
+                'region'             => $region,
+                'meet_date'          => $meetDate,
+                'meet_time'          => $meetTime,
+                'experience_level'   => $level,
+                'max_participants'   => (int)$maxParticipants,
+                'description'        => $description,
+                'status'             => 'geplant',
+                'latitude'           => $latitude,
+                'longitude'          => $longitude,
+            ];
+
+            $newMeetupId = $meetupModel->createMeetup($data);
+
+            if ($newMeetupId) {
+                return redirect()->to('flightmeet/meetups/' . $newMeetupId)->with('success', 'Flugtreffen erfolgreich erstellt!');
+            }
+
+            return redirect()->back()->withInput()->with('error', 'Das Erstellen des Treffens ist fehlgeschlagen.');
         }
 
 

@@ -211,6 +211,33 @@ class MeetupModel extends Model
         return true;
     }
 
+    public function createMeetup(array $data): ?int
+    {
+        // Transaktion starten
+        $this->db->transStart();
+
+        // 1. Flugtreffen in die Tabelle 'fm_flight_meets' schreiben
+        $meetupId = $this->insert($data);
+
+        if ($meetupId) {
+            // 2. Ersteller direkt als ersten Teilnehmer in 'fm_flight_meet_participants' eintragen
+            $this->db->table('fm_flight_meet_participants')->insert([
+                'flight_meet_id' => (int)$meetupId,
+                'user_id'        => (int)$data['creator_id']
+            ]);
+        }
+
+        // Transaktion abschließen
+        $this->db->transComplete();
+
+        // Prüfen, ob beide Querys erfolgreich waren
+        if ($this->db->transStatus() === false) {
+            return null; // Im Fehlerfall null zurückgeben (automatisches Rollback)
+        }
+
+        return $meetupId ? (int)$meetupId : null;
+    }
+
 
 }
 
