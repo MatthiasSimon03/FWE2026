@@ -68,7 +68,7 @@ class MeetupModel extends Model
         return $builder->get()->getResultArray();
     }
 
-    public function getMeetupById(int $id): ?array
+    public function getMeetupById(int $id, ?int $currentUserId = null): ?array
     {
         $builder = $this->db->table($this->table . ' fm');
         $builder
@@ -102,6 +102,17 @@ class MeetupModel extends Model
         $meetup['participants'] = $participants;
         $meetup['free_slots'] = max(0, (int)$meetup['max_participants'] - (int)$meetup['participants_count']);
 
+        $isParticipating = false;
+        if ($currentUserId !== null) {
+            foreach ($participants as $p) {
+                if ((int)$p['id'] === (int)$currentUserId) {
+                    $isParticipating = true;
+                    break;
+                }
+            }
+        }
+        $meetup['is_participating'] = $isParticipating;
+
         return $meetup ?: [];
     }
 
@@ -126,6 +137,78 @@ class MeetupModel extends Model
             'regions' => $regions,
             'levels' => $levels,
         ];
+    }
+
+    public function joinMeetup(int $meetupId, int $userId): bool
+    {
+        $db = \Config\Database::connect();
+
+        // 1. Prüfen, ob der Nutzer bereits teilnimmt (Doppelbuchung verhindern)
+        $exists = $db->table('fm_flight_meet_participants')
+                ->where('flight_meet_id', $meetupId)
+                ->where('user_id', $userId)
+                ->countAllResults() > 0;
+
+        if ($exists) {
+            return false;
+        }
+
+        // 2. Treffen laden und prüfen, ob es überhaupt "geplant" ist
+        $meetup = $this->find($meetupId);
+        if (!$meetup || $meetup['status'] !== 'geplant') {
+            return false;
+        }
+
+        // 3. Teilnehmer eintragen
+        $db->table('fm_flight_meet_participants')->insert([
+            'flight_meet_id' => $meetupId,
+            'user_id'        => $userId,
+        ]);
+
+        // 4. Wenn das Treffen nun voll ist, Status auf 'ausgebucht' ändern
+        $currentCount = $db->table('fm_flight_meet_participants')
+            ->where('flight_meet_id', $meetupId)
+            ->countAllResults();
+
+        if ($currentCount >= (int)$meetup['max_participants']) {
+            $this->update($meetupId, ['status' => 'ausgebucht']);
+        }
+
+        return true;
+    }
+
+    public function leaveMeetup(int $meetupId, int $userId): bool
+    {
+        $db = \Config\Database::connect();
+
+        // 1. Prüfen, ob der Nutzer überhaupt angemeldet ist
+        $exists = $db->table('fm_flight_meet_participants')
+                ->where('flight_meet_id', $meetupId)
+                ->where('user_id', $userId)
+                ->countAllResults() > 0;
+
+        if (!$exists) {
+            return false;
+        }
+
+        // 2. Treffen laden
+        $meetup = $this->find($meetupId);
+        if (!$meetup) {
+            return false;
+        }
+
+        // 3. Teilnehmer austragen
+        $db->table('fm_flight_meet_participants')
+            ->where('flight_meet_id', $meetupId)
+            ->where('user_id', $userId)
+            ->delete();
+
+        // 4. Status-Prüfung: War das Treffen vorher ausgebucht, ändern auf geplant
+        if ($meetup['status'] === 'ausgebucht') {
+            $this->update($meetupId, ['status' => 'geplant']);
+        }
+
+        return true;
     }
 
 

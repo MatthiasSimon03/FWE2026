@@ -1,8 +1,20 @@
 <?= $this->extend('FlightMeet/layout') ?>
 <?= $this->section('content') ?>
 
-    <div class="fm-detail-layout">
+    <!-- NEU: Globale Feedback-Meldungen (Erfolg / Fehler) -->
+    <?php if (session()->getFlashdata('success')): ?>
+        <div class="alert alert-success">
+            <?= esc(session()->getFlashdata('success')) ?>
+        </div>
+    <?php endif; ?>
 
+    <?php if (session()->getFlashdata('error')): ?>
+        <div class="alert alert-error">
+            <?= esc(session()->getFlashdata('error')) ?>
+        </div>
+    <?php endif; ?>
+
+    <div class="fm-detail-layout">
         <!-- Linker Bereich: Hauptinhalt & Karte -->
         <div class="fm-detail-main">
             <h1 class="fm-detail-title"><?= esc($meetup['title']) ?></h1>
@@ -71,9 +83,31 @@
 
                 <!-- Buttons -->
                 <div class="fm-sidebar-actions">
+                    <!-- Fall 1: Das Treffen ist regulär geplant -->
                     <?php if ($meetup['status'] === 'geplant'): ?>
-                        <button class="btn btn-primary-full">Teilnehmen</button>
+                        <?php if ($meetup['is_participating']): ?>
+                            <!-- User nimmt bereits teil -> Absagen -->
+                            <form method="post" action="<?= base_url('flightmeet/meetups/leave/' . $meetup['id']) ?>" style="width:100%;">
+                                <?= csrf_field() ?>
+                                <button class="btn-danger-full" type="submit">Absagen</button>
+                            </form>
+                        <?php else: ?>
+                            <!-- User nimmt noch nicht teil -> Teilnehmen -->
+                            <form method="post" action="<?= base_url('flightmeet/meetups/join/' . $meetup['id']) ?>" style="width:100%;">
+                                <?= csrf_field() ?>
+                                <button class="btn btn-primary-full" type="submit">Teilnehmen</button>
+                            </form>
+                        <?php endif; ?>
+
+                        <!-- Fall 2: Das Treffen ist ausgebucht, aber der angemeldete User nimmt teil -->
+                    <?php elseif ($meetup['status'] === 'ausgebucht' && $meetup['is_participating']): ?>
+                        <form method="post" action="<?= base_url('flightmeet/meetups/leave/' . $meetup['id']) ?>" style="width:100%;">
+                            <?= csrf_field() ?>
+                            <button class="btn-danger-full" type="submit">Absagen</button>
+                        </form>
                     <?php endif; ?>
+
+                    <!-- Link zurück zur Übersicht -->
                     <a class="btn-secondary-full" href="<?= base_url('flightmeet/meetups') ?>">Zurück zur Übersicht</a>
                 </div>
 
@@ -89,6 +123,11 @@
                             <li>
                                 <span class="fm-participant-avatar">👤</span>
                                 <span class="fm-participant-name"><?= esc($p['username']) ?></span>
+                                <?php if ((int)$p['id'] !== (int)session()->get('fm_user_id')): ?>
+                                    <span class="fm-participant-mail">
+                                        <a style="text-decoration: none;" href="<?= base_url('flightmeet/chat') ?>"><i class="ph ph-envelope icons-meetup-mail"></i> </a>
+                                    </span>
+                                <?php endif; ?>
                             </li>
                         <?php endforeach; ?>
                     </ul>
@@ -102,7 +141,14 @@
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap-Mitwirkende'
         }).addTo(map);
-        var marker = L.marker([<?= esc($meetup['latitude']) ?>, <?= esc($meetup['longitude']) ?>]).addTo(map);
+        var paragliderIcon = L.icon({
+            iconUrl: '../../assets/icons/paraglider.png',
+
+            iconSize: [40, 40],      // Breite, Höhe
+            iconAnchor: [20, 40],    // Punkt des Icons auf der Koordinate
+            popupAnchor: [0, -40]    // Position des Popups relativ zum Icon
+        });
+        var marker = L.marker([<?= esc($meetup['latitude']) ?>, <?= esc($meetup['longitude']) ?>], {icon: paragliderIcon}).addTo(map);
     </script>
 
 <?= $this->endSection() ?>

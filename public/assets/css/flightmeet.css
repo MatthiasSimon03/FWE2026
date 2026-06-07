@@ -13,7 +13,7 @@
   --color-secondary-hover: #e2e8f0;
 
   /* Textfarben */
-  --color-text-main: #1f2933;
+  --color-text-main: #153e59;
   --color-text-title: #1e293b;
   --color-text-lead: #444444;
   --color-text-muted-dark: #4b5563;
@@ -60,6 +60,15 @@
   --color-level-fortgeschritten: #92400e;
   --color-level-fortgeschritten-bg: #fffbeb;
   --color-level-fortgeschritten-border: #fef3c7;
+
+  /* Alert-Farben (Erfolg & Fehler) - NEU */
+  --color-alert-success: #15803d;
+  --color-alert-success-bg: #f0fdf4;
+  --color-alert-success-border: #bbf7d0;
+
+  --color-alert-error: #b91c1c;
+  --color-alert-error-bg: #fef2f2;
+  --color-alert-error-border: #fecaca;
 }
 
 /* ==========================================================================
@@ -108,6 +117,8 @@ main {
 /* Gemeinsame Button-Eigenschaften gebündelt */
 .btn,
 .btn-primary-full,
+.btn-danger-full,
+.btn-new-meet,
 .btn-secondary-full {
   padding: 12px 18px;
   border-radius: 6px;
@@ -154,6 +165,64 @@ main {
 .btn-secondary-full:hover {
   background: var(--color-secondary-hover);
   color: var(--color-text-main);
+}
+
+.btn-danger-full {
+  width: 100%;
+  background: var(--color-status-abgesagt);
+  color: #fff;
+  border: none;
+  cursor: pointer;
+}
+
+.btn-danger-full:hover {
+  background-color: #991b1b;
+}
+
+.btn-new-meet{
+  background-color: var(--color-primary);
+  color: #ffffff; /* Weißer Text für optimalen Kontrast */
+  border: 1px solid transparent;
+
+  /* Flexbox für perfekte Ausrichtung von Icon und Text */
+  display: inline-flex;
+  align-items: center;
+  gap: 8px; /* Abstand zwischen Plus-Icon und Text */
+
+  /* Beibehaltung der runden Pillen-Form */
+  border-radius: 999px;
+  transition: background-color 0.15s ease-in-out, filter 0.15s ease-in-out, transform 0.1s ease-in-out;
+}
+
+.btn-new-meet:hover {
+  filter: brightness(0.9); /* Dunkelt das Grün beim Drüberfahren leicht ab */
+  color: #ffffff;
+}
+
+.btn-new-meet:active {
+  transform: scale(0.98); /* Minimaler Klick-Effekt für besseres haptisches Feedback */
+}
+
+.alert {
+  padding: 12px 16px;
+  border-radius: 8px;
+  margin-bottom: 20px;
+  font-size: 0.95rem;
+  font-weight: 500;
+  display: flex;
+  align-items: center;
+}
+
+.alert-success {
+  background-color: var(--color-alert-success-bg);
+  color: var(--color-alert-success);
+  border: 1px solid var(--color-alert-success-border);
+}
+
+.alert-error {
+  background-color: var(--color-alert-error-bg);
+  color: var(--color-alert-error);
+  border: 1px solid var(--color-alert-error-border);
 }
 
 /* ==========================================================================
@@ -235,20 +304,9 @@ main {
   transition: all 0.15s ease-in-out;
 }
 
-@media (max-width: 768px) {
-  .fm-nav { flex-direction: column; align-items: stretch; }
-  .fm-brand { justify-content: space-between; }
-  .fm-toggle { display: inline-flex; }
-  .fm-menu { display: none; flex-direction: column; gap: 8px; }
-  .fm-menu.is-open { display: flex; }
-  #fmTableView { display: none; }
-  .fm-view-toggle [data-view="table"] { display: none; }
-  .fm-view-toggle { display: none; }
-}
-
 .footer {
   width: 100%;
-  background-color: #000;
+  background-color: var(--color-text-main);
   color: #fff;
   text-align: center;
   padding: 12px 0;
@@ -635,6 +693,15 @@ main {
   font-weight: 600;
 }
 
+.fm-controls-bar {
+  display: flex;
+  justify-content: space-between; /* Schiebt Inhalt nach links und rechts */
+  align-items: center;            /* Richtet Elemente vertikal mittig aus */
+  margin-top: 20px;               /* Abstand nach oben (optional, je nach Bedarf) */
+  margin-bottom: 20px;            /* Abstand nach unten zu den Karten/Tabellen */
+  width: 100%;
+}
+
 /* ==========================================================================
    8. VISUELLE ABZEICHEN (BADGES)
    ========================================================================== */
@@ -674,7 +741,19 @@ main {
 
 .icons-meetup-detail {
   font-size: 32px;
-  color: #1e88e5;
+  color: var(--color-primary);
+}
+
+.icons-meetup-mail {
+  font-size: 20px;
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.ph-plus {
+  font-size: 1rem; /* Passt sich besser der Textgröße an */
+  display: inline-block;
+  line-height: 1;
 }
 
 /* ==========================================================================
@@ -828,6 +907,12 @@ main {
   color: var(--color-text-dark);
 }
 
+.fm-participant-mail {
+  margin-left: auto;        /* Nimmt den gesamten freien Platz links ein */
+  display: inline-flex;
+  align-items: center;
+}
+
 .fm-sidebar-actions {
   display: flex;
   flex-direction: column;
@@ -856,4 +941,16 @@ main {
     grid-template-columns: 1.7fr 1.3fr;
     align-items: start;
   }
+}
+
+
+@media (max-width: 768px) {
+  .fm-nav { flex-direction: column; align-items: stretch; }
+  .fm-brand { justify-content: space-between; }
+  .fm-toggle { display: inline-flex; }
+  .fm-menu { display: none; flex-direction: column; gap: 8px; }
+  .fm-menu.is-open { display: flex; }
+  #fmTableView { display: none; }
+  .fm-view-toggle [data-view="table"] { display: none; }
+  .fm-view-toggle { display: none; }
 }

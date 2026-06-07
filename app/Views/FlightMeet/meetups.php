@@ -7,7 +7,7 @@
     </div>
 <?php endif; ?>
 
-<h1>Flugtreffen</h1>
+<h1>Flugtreffen <img src="<?= base_url('assets/icons/gliderIcon.png') ?>" alt="Icon" class="fm-icon"></h1>
 <p class="lead">
     Entdecke anstehende Flugtreffen und verabrede dich mit anderen Interessierten.
 </p>
@@ -76,9 +76,15 @@
     </div>
 </form>
 
-<div class="fm-view-toggle" role="group" aria-label="Darstellungsart wählen">
-    <button class="fm-toggle-btn is-active" type="button" data-view="cards">Kartenansicht</button>
-    <button class="fm-toggle-btn" type="button" data-view="table">Tabellenansicht</button>
+<div class="fm-controls-bar">
+    <div class="fm-view-toggle" role="group" aria-label="Darstellungsart wählen">
+        <button class="fm-toggle-btn is-active" type="button" data-view="cards">Kartenansicht</button>
+        <button class="fm-toggle-btn" type="button" data-view="table">Tabellenansicht</button>
+    </div>
+
+    <a href="<?= base_url('flightmeet/meetups/create') ?>" class="btn-new-meet">
+        <i class="ph ph-plus"></i> Neues Treffen
+    </a>
 </div>
 
 <section class="fm-section" id="fmCardsView">

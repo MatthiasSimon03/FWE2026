@@ -41,7 +41,8 @@ class Home extends BaseController
     public function meetupDetail(int $id): ResponseInterface
     {
         $meetupModel = new MeetupModel();
-        $meetup = $meetupModel->getMeetupById($id);
+        $currentUserId = session()->get('fm_user_id');
+        $meetup = $meetupModel->getMeetupById($id, $currentUserId);
 
         if ($meetup === null) {
             return redirect()
@@ -79,5 +80,43 @@ class Home extends BaseController
             'title' => 'FlightMeet - Profil',
             'active' => 'profile',
         ]));
+    }
+
+    public function joinMeetup(int $id): ResponseInterface
+    {
+        $userId = session()->get('fm_user_id');
+        $meetupModel = new MeetupModel();
+
+        if ($meetupModel->joinMeetup($id, $userId)) {
+            return redirect()->to('flightmeet/meetups/' . $id)->with('success', 'Du hast dich erfolgreich angemeldet!');
+        }
+
+        return redirect()->to('flightmeet/meetups/' . $id)->with('error', 'Anmeldung fehlgeschlagen (Treffen ist bereits voll).');
+    }
+
+    public function leaveMeetup(int $id): ResponseInterface
+    {
+        $userId = session()->get('fm_user_id');
+        $meetupModel = new MeetupModel();
+
+        if ($meetupModel->leaveMeetup($id, $userId)) {
+            return redirect()->to('flightmeet/meetups/' . $id)->with('success', 'Du hast dich erfolgreich abgemeldet.');
+        }
+
+        return redirect()->to('flightmeet/meetups/' . $id)->with('error', 'Abmeldung fehlgeschlagen.');
+    }
+
+    public function createMeetup(): ResponseInterface {
+        if ($this->request->is('post')) {
+            return redirect()->to('flightmeet/meetups')->with('success', 'Flugtreffen wurde erfolgreich erstellt (funktioniert noch nicht wirklich).');
+        }
+
+
+        // 2. Wenn die Seite normal aufgerufen wird (GET)
+        return $this->response->setBody(view('FlightMeet/meetupCreate', [
+            'title'  => 'FlightMeet - Neues Treffen',
+            'active' => 'meetups',
+        ]));
+
     }
 }

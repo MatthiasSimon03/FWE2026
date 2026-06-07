@@ -1,7 +1,7 @@
 <?= $this->extend('FlightMeet/layout') ?>
 
 <?= $this->section('content') ?>
-<h1>FlightMeet</h1>
+<h1>FlightMeet <img src="<?= base_url('assets/icons/gliderIcon.png') ?>" alt="Icon" class="fm-icon"></h1>
 <p class="lead">
     FlightMeet ist eine Plattform, auf der Fluginteressierte sich zu
     Flugtreffen verabreden und Gruppen bilden können.
