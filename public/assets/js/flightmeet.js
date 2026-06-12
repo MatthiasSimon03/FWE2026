@@ -71,7 +71,6 @@ document.querySelectorAll('input[data-auto-submit="status"]').forEach((checkbox)
 // ==========================================================================
 const mapPickerEl = document.getElementById('map-picker');
 
-// Führt den Code nur aus, wenn die Karte existiert und Leaflet (L) geladen ist
 if (mapPickerEl && typeof L !== 'undefined') {
 	// Standard-Fokus (z. B. Chiemsee-Region / Hochries)
 	const defaultLat = 49.7491;
@@ -97,11 +96,24 @@ if (mapPickerEl && typeof L !== 'undefined') {
 		attribution: '&copy; OpenStreetMap-Mitwirkende'
 	}).addTo(mapPicker);
 
+	// Dynamisches Auslesen des benutzerdefinierten Icons (Paraglider)
+	const iconUrl = mapPickerEl.dataset.iconUrl;
+	let markerOptions = {};
+
+	if (iconUrl) {
+		markerOptions.icon = L.icon({
+			iconUrl: iconUrl,
+			iconSize: [40, 40],
+			iconAnchor: [20, 40],
+			popupAnchor: [0, -40]
+		});
+	}
+
 	let marker = null;
 
-	// Falls bereits Koordinaten vorhanden waren (z.B. nach Validierungsfehler)
+	// Falls bereits Koordinaten vorhanden waren (z.B. Edit-Modus oder nach Validierungsfehler)
 	if (hasInitialMarker) {
-		marker = L.marker([initialLat, initialLng]).addTo(mapPicker);
+		marker = L.marker([initialLat, initialLng], markerOptions).addTo(mapPicker);
 		updateIndicator(initialLat, initialLng);
 	}
 
@@ -111,7 +123,7 @@ if (mapPickerEl && typeof L !== 'undefined') {
 		const lng = e.latlng.lng;
 
 		if (marker === null) {
-			marker = L.marker([lat, lng]).addTo(mapPicker);
+			marker = L.marker([lat, lng], markerOptions).addTo(mapPicker);
 		} else {
 			marker.setLatLng([lat, lng]);
 		}

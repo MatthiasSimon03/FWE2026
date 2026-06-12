@@ -27,6 +27,8 @@ class MeetupModel extends Model
 
     public function getMeetups(array $filters): array
     {
+        $this->autoClosePastMeetups();
+
         $search = isset($filters['q']) ? trim((string) $filters['q']) : '';
         $region = isset($filters['region']) ? trim((string) $filters['region']) : '';
         $level = isset($filters['level']) ? trim((string) $filters['level']) : '';
@@ -70,10 +72,12 @@ class MeetupModel extends Model
 
     public function getMeetupById(int $id, ?int $currentUserId = null): ?array
     {
+        $this->autoClosePastMeetups();
+
         $builder = $this->db->table($this->table . ' fm');
         $builder
             ->select(
-                'fm.id, fm.title, fm.location, fm.region, fm.description, fm.meet_date, fm.meet_time, '
+                'fm.id, fm.creator_id, fm.title, fm.location, fm.region, fm.description, fm.meet_date, fm.meet_time, '
                 . 'fm.experience_level, fm.creator_is_private, fm.max_participants, fm.status, fm.longitude, fm.latitude, '
                 . 'COUNT(p.user_id) AS participants_count',
                 false // Deaktiviert das automatische Escaping für die COUNT-Funktion
@@ -236,6 +240,17 @@ class MeetupModel extends Model
         }
 
         return $meetupId ? (int)$meetupId : null;
+    }
+
+    public function autoClosePastMeetups(): void
+    {
+        $currentDateTime = date('Y-m-d H:i:s');
+
+        // Aktualisiert alle abgelaufenen geplanten oder ausgebuchten Treffen auf "abgeschlossen"
+        $this->db->table($this->table)
+            ->whereIn('status', ['geplant', 'ausgebucht'])
+            ->where("CONCAT(meet_date, ' ', meet_time) <", $currentDateTime)
+            ->update(['status' => 'abgeschlossen']);
     }
 
 

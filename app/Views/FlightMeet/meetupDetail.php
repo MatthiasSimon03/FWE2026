@@ -17,7 +17,12 @@
     <div class="fm-detail-layout">
         <!-- Linker Bereich: Hauptinhalt & Karte -->
         <div class="fm-detail-main">
-            <h1 class="fm-detail-title"><?= esc($meetup['title']) ?></h1>
+
+            <!-- Titel-Header mit Flex-Layout für die Icons -->
+            <div class="fm-detail-header">
+                <h1 class="fm-detail-title" style="margin: 0;"><?= esc($meetup['title']) ?></h1>
+            </div>
+
             <p class="lead fm-detail-desc"><?= esc($meetup['description']) ?></p>
 
             <div class="fm-detail-map-section">
@@ -29,7 +34,33 @@
         <!-- Rechter Bereich: Info-Card, Teilnehmer & Aktionen -->
         <div class="fm-detail-sidebar">
             <div class="fm-detail-card">
-                <h3 class="fm-detail-card-title">Treffen-Details</h3>
+
+                <!-- Treffen-Details Überschrift mit den Aktions-Buttons daneben -->
+                <h3 class="fm-detail-card-title" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 0; margin-bottom: 20px;">
+                    <span>Treffen-Details</span>
+                    <?php if ((int)$meetup['creator_id'] === (int)session()->get('fm_user_id')): ?>
+                        <div class="fm-detail-actions">
+                            <!-- Bearbeiten Icon -->
+                            <a href="<?= base_url('flightmeet/meetups/edit/' . $meetup['id']) ?>"
+                               class="btn-action-edit"
+                               title="Flugtreffen bearbeiten">
+                                <i class="ph ph-pencil" style="font-size: 1.2rem;"></i>
+                            </a>
+
+                            <!-- Löschen Formular + Icon -->
+                            <form method="post" action="<?= base_url('flightmeet/meetups/delete/' . $meetup['id']) ?>"
+                                  onsubmit="return confirm('Möchten Sie dieses Flugtreffen wirklich löschen? Alle Anmeldungen gehen dabei verloren.');"
+                                  style="display: inline;">
+                                <?= csrf_field() ?>
+                                <button type="submit" class="btn-action-delete" title="Flugtreffen löschen">
+                                    <i class="ph ph-trash" style="font-size: 1.2rem;"></i>
+                                </button>
+                            </form>
+                        </div>
+                    <?php endif; ?>
+                </h3>
+
+
 
                 <dl class="fm-detail-info-list">
                     <div class="fm-detail-info-item">

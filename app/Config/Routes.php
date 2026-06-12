@@ -13,15 +13,17 @@ $routes->get('overview', 'OverviewController::index');
 // FlightMeet App
 $routes->group('flightmeet', ['filter' => 'fm_auth', 'namespace' => 'App\Controllers\FlightMeet'], static function ($routes) {
     $routes->get('/', 'Home::index');
-    $routes->get('meetups', 'Home::meetups');
-    $routes->get('groups', 'Home::groups');
-    $routes->get('chat', 'Home::chat');
-    $routes->get('profile', 'Home::profile');
-    $routes->get('meetups/(:num)', 'Home::meetupDetail/$1');
+    $routes->get('meetups', 'MeetupController::index');
+    $routes->get('groups', 'GroupController::index');
+    $routes->get('chat', 'ChatController::index');
+    $routes->get('profile', 'ProfileController::index');
+    $routes->get('meetups/(:num)', 'MeetupController::detail/$1');
 
-    $routes->post('meetups/join/(:num)', 'Home::joinMeetup/$1');
-    $routes->post('meetups/leave/(:num)', 'Home::leaveMeetup/$1');
-    $routes->match(['get', 'post'], 'meetups/create', 'Home::createMeetup');
+    $routes->post('meetups/join/(:num)', 'MeetupController::join/$1');
+    $routes->post('meetups/leave/(:num)', 'MeetupController::leave/$1');
+    $routes->match(['get', 'post'], 'meetups/create', 'MeetupController::create');
+    $routes->match(['get', 'post'], 'meetups/edit/(:num)', 'MeetupController::edit/$1');
+    $routes->post('meetups/delete/(:num)', 'MeetupController::delete/$1');
 });
 
 // FlightMeet Login (ohne Filter, der Zugriff schützt)
