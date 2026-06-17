@@ -17,13 +17,16 @@ $routes->group('flightmeet', ['filter' => 'fm_auth', 'namespace' => 'App\Control
     $routes->get('groups', 'GroupController::index');
     $routes->get('chat', 'ChatController::index');
     $routes->get('profile', 'ProfileController::index');
-    $routes->get('meetups/(:num)', 'MeetupController::detail/$1');
 
+    $routes->get('meetups/(:num)', 'MeetupController::detail/$1');
     $routes->post('meetups/join/(:num)', 'MeetupController::join/$1');
     $routes->post('meetups/leave/(:num)', 'MeetupController::leave/$1');
     $routes->match(['get', 'post'], 'meetups/create', 'MeetupController::create');
     $routes->match(['get', 'post'], 'meetups/edit/(:num)', 'MeetupController::edit/$1');
     $routes->post('meetups/delete/(:num)', 'MeetupController::delete/$1');
+
+    $routes->get('chat/getMessages', 'ChatController::getMessages');
+    $routes->post('chat/sendMessage', 'ChatController::sendMessage');
 });
 
 // FlightMeet Login (ohne Filter, der Zugriff schützt)

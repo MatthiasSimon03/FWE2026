@@ -100,6 +100,7 @@ Diese Tabelle speichert alle Chat-Nachrichten des Systems. Über Fremdschlüssel
 | `group_id` | `INT` | `NULL`, `FOREIGN KEY` | Referenziert `fm_groups(id)`. |
 | `flight_meet_id` | `INT` | `NULL`, `FOREIGN KEY` | Referenziert `fm_flight_meets(id)`. |
 | `created_at` | `TIMESTAMP` | `DEFAULT CURRENT_TIMESTAMP` | Sendezeitpunkt. |
+| `recipient_id` | `INT` | `NULL`, `FOREIGN KEY` | Optionaler Empfänger für Direktnachrichten (Referenz auf `fm_users(id)`). |
 
 ---
 

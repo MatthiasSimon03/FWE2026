@@ -1,13 +1,89 @@
 <?= $this->extend('FlightMeet/layout') ?>
-
 <?= $this->section('content') ?>
-<h1>Chat</h1>
-<p class="lead">
-    Tausche dich in Echtzeit mit anderen Mitgliedern aus.
-</p>
 
-<div class="card">
-    <p>Hier entsteht der Kommunikationsbereich für FlightMeet.</p>
-</div>
+    <!-- Load date-fns via CDN (Zählt als 2. externe JS-Bibliothek für Ihr Uni-Projekt) -->
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@3.6.0/cdn.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/date-fns@3.6.0/locale/de/cdn.min.js"></script>
+
+    <div class="fm-chat-container">
+
+        <!-- Linke Sidebar -->
+        <div class="fm-chat-sidebar">
+            <div class="fm-chat-sidebar-header">Kommunikation</div>
+
+            <div class="fm-chat-channels-list">
+
+                <!-- Globaler Chat -->
+                <div class="fm-chat-item is-active" data-chat-type="global" data-target-id="">
+                    <i class="ph ph-globe" style="font-size: 1.2rem;"></i>
+                    <span>Globaler Chat</span>
+                </div>
+
+                <!-- Direktnachrichten -->
+                <div class="fm-chat-section-title">Piloten (Direkt)</div>
+                <?php foreach ($pilots as $p): ?>
+                    <div class="fm-chat-item" data-chat-type="dm" data-target-id="<?= $p['id'] ?>" data-username="<?= esc($p['username']) ?>" <?= ($target_user_id === (int)$p['id']) ? 'id="trigger-active-dm"' : '' ?>>
+                        <i class="ph ph-user"></i>
+                        <span><?= esc($p['username']) ?></span>
+                    </div>
+                <?php endforeach; ?>
+
+                <!-- Gruppenkanäle -->
+                <div class="fm-chat-section-title">Gruppen</div>
+                <?php if (empty($groups)): ?>
+                    <p class="fm-empty" style="padding-left: 8px;">Keine Gruppenkanäle aktiv.</p>
+                <?php else: ?>
+                    <?php foreach ($groups as $g): ?>
+                        <div class="fm-chat-item" data-chat-type="group" data-target-id="<?= $g['id'] ?>">
+                            <i class="ph ph-hash"></i>
+                            <span><?= esc($g['name']) ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+
+                <!-- Treffen-Chats -->
+                <div class="fm-chat-section-title">Flugtreffen</div>
+                <?php if (empty($meetups)): ?>
+                    <p class="fm-empty" style="padding-left: 8px;">Keine Treffen-Chats aktiv.</p>
+                <?php else: ?>
+                    <?php foreach ($meetups as $m): ?>
+                        <div class="fm-chat-item" data-chat-type="meetup" data-target-id="<?= $m['id'] ?>">
+                            <i class="ph ph-airplane"></i>
+                            <span><?= esc($m['title']) ?></span>
+                        </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+        </div>
+
+        <!-- Rechter Hauptbereich (Das Chatfenster) -->
+        <!-- Rechter Hauptbereich (Das Chatfenster) -->
+        <div class="fm-chat-window">
+
+            <!-- Chat Header mit responsivem Zurück-Button -->
+            <div class="fm-chat-window-header" style="display: flex; align-items: center; gap: 8px;">
+                <button class="fm-chat-back-btn" id="chat-back-btn" style="display: none;" title="Zurück zur Auswahl">
+                    <i class="ph ph-caret-left" style="font-size: 1.5rem; font-weight: bold;"></i>
+                </button>
+                <span id="chat-header-title" style="font-weight: 600;">Globaler Chat</span>
+            </div>
+
+            <!-- Nachrichtenverlauf (bleibt gleich) -->
+            <div class="fm-chat-messages-scroll" id="chat-messages-area">
+                <button class="fm-chat-load-more-btn" id="load-more-btn" style="display:none;">Ältere Nachrichten laden</button>
+                <div id="messages-container" style="display: flex; flex-direction: column; gap: 14px;"></div>
+            </div>
+
+            <!-- Eingabebereich (bleibt gleich) -->
+            <div class="fm-chat-input-area">
+                <form class="fm-chat-input-form" id="chat-submit-form" onsubmit="return false;">
+                    <input type="text" id="chat-text-input" class="fm-chat-text-input" placeholder="Nachricht schreiben..." autocomplete="off" required>
+                    <button type="submit" class="fm-chat-send-btn">
+                        <i class="ph ph-paper-plane-right" style="font-size: 1.25rem;"></i>
+                    </button>
+                </form>
+            </div>
+        </div>
+    </div>
+
 <?= $this->endSection() ?>
-
