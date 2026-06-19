@@ -4,43 +4,30 @@ namespace App\Controllers\FlightMeet;
 
 use CodeIgniter\Controller;
 use App\Models\FlightMeet\ChatModel;
+use App\Models\FlightMeet\UserModel;
+use App\Models\FlightMeet\MeetupModel;
 
 class ChatController extends Controller
 {
     protected ChatModel $chatModel;
+    protected UserModel $userModel;
+    protected MeetupModel $meetupModel;
 
     public function __construct()
     {
         $this->chatModel = new ChatModel();
+        $this->userModel = new UserModel();
+        $this->meetupModel = new MeetupModel();
     }
 
     public function index()
     {
         $currentUserId = session()->get('fm_user_id');
-        $db = \Config\Database::connect();
 
-        // 1. Alle anderen Piloten laden (für Direktnachrichten)
-        $pilots = $db->table('fm_users')
-            ->select('id, username, experience_level')
-            ->where('id !=', $currentUserId)
-            ->orderBy('username', 'ASC')
-            ->get()->getResultArray();
-
-        // 2. Gruppen laden, in denen der Nutzer Mitglied ist
-        $groups = $db->table('fm_groups g')
-            ->select('g.id, g.name')
-            ->join('fm_group_members m', 'm.group_id = g.id')
-            ->where('m.user_id', $currentUserId)
-            ->orderBy('g.name', 'ASC')
-            ->get()->getResultArray();
-
-        // 3. Meetups laden, bei denen der Nutzer angemeldet ist
-        $meetups = $db->table('fm_flight_meets fm')
-            ->select('fm.id, fm.title')
-            ->join('fm_flight_meet_participants p', 'p.flight_meet_id = fm.id')
-            ->where('p.user_id', $currentUserId)
-            ->orderBy('fm.title', 'ASC')
-            ->get()->getResultArray();
+        // Komplette Auslagerung der Datenbanklogik in die entsprechenden Models
+        $pilots  = $this->userModel->getOtherPilots($currentUserId);
+        $groups  = $this->userModel->getUserGroups($currentUserId);
+        $meetups = $this->meetupModel->getUserMeetups($currentUserId);
 
         $targetUserId = $this->request->getGet('user');
 
@@ -91,15 +78,25 @@ class ChatController extends Controller
         $targetId = $this->request->getPost('target_id') !== null && $this->request->getPost('target_id') !== '' ? (int)$this->request->getPost('target_id') : null;
         $messageText = trim((string)$this->request->getPost('message_text'));
 
-        if (empty($messageText)) {
-            return $this->response->setJSON(['error' => 'Nachricht darf nicht leer sein.']);
+        // 1. Validierung der Nachricht (Inhalt & Zeichenbegrenzung gegen Denial of Service)
+        if (empty($messageText) || mb_strlen($messageText) > 2000) {
+            return $this->response->setJSON(['error' => 'Nachricht darf nicht leer sein und maximal 2000 Zeichen enthalten.']);
         }
 
+        // 2. Autorisierungsprüfung für Gruppen und Treffen
         if ($type === 'group' && !$this->chatModel->isGroupMember($targetId, $currentUserId)) {
             return $this->response->setJSON(['error' => 'Nicht autorisiert.']);
         }
         if ($type === 'meetup' && !$this->chatModel->isMeetupParticipant($targetId, $currentUserId)) {
             return $this->response->setJSON(['error' => 'Nicht autorisiert.']);
+        }
+
+        // 3. Sicherheitsvalidierung: Existiert der Empfänger bei Direktnachrichten (DMs)?
+        if ($type === 'dm' && $targetId !== null) {
+            $recipientExists = $this->userModel->find($targetId) !== null;
+            if (!$recipientExists) {
+                return $this->response->setJSON(['error' => 'Der ausgewählte Empfänger existiert nicht.']);
+            }
         }
 
         $data = [

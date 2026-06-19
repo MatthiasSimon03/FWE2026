@@ -36,12 +36,12 @@
                 <!-- Datum & Uhrzeit (Zweispaltig) -->
                 <div class="fm-form-grid fm-form-grid--two-cols">
                     <label class="fm-field">
-                        <span class="fm-field__label">Datum</span>
-                        <input class="fm-field__input" type="date" name="meet_date" value="<?= esc(old('meet_date')) ?>" required>
+                        <span class="fm-field__label">Datum des Treffens</span>
+                        <input type="text" id="meet_date" name="meet_date" class="fm-field__input" placeholder="Datum auswählen..." required>
                     </label>
                     <label class="fm-field">
                         <span class="fm-field__label">Uhrzeit</span>
-                        <input class="fm-field__input" type="time" name="meet_time" value="<?= esc(old('meet_time')) ?>" required>
+                        <input type="text" id="meet_time" name="meet_time" class="fm-field__input" placeholder="Uhrzeit auswählen..." required>
                     </label>
                 </div>
 

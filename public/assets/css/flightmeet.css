@@ -533,6 +533,7 @@ main {
 
 .fm-row-link {
   position: relative;
+  transform: scale(1);
 }
 
 .fm-row-link__anchor::after {
@@ -1226,10 +1227,12 @@ textarea.fm-field__input {
 
 .fm-msg-bubble-wrapper.is-me {
   align-self: flex-end;
+  align-items: flex-end; /* NEU: Verhindert das Dehnen und richtet alles rechtsbündig aus */
 }
 
 .fm-msg-bubble-wrapper.is-other {
   align-self: flex-start;
+  align-items: flex-start; /* NEU: Verhindert das Dehnen und richtet alles linksbündig aus */
 }
 
 .fm-msg-meta {
@@ -1237,6 +1240,7 @@ textarea.fm-field__input {
   color: var(--color-text-muted-light);
   margin-bottom: 4px;
   padding: 0 4px;
+  white-space: nowrap; /* NEU: Verhindert einen unschönen Zeilenumbruch beim Datum */
 }
 
 .fm-msg-bubble {
@@ -1245,6 +1249,7 @@ textarea.fm-field__input {
   font-size: 0.95rem;
   line-height: 1.4;
   word-break: break-word;
+  width: fit-content; /* NEU: Die Blase zieht sich auf die exakte Breite ihres Textes zusammen */
 }
 
 .fm-msg-bubble-wrapper.is-me .fm-msg-bubble {
@@ -1397,4 +1402,24 @@ textarea.fm-field__input {
   .fm-chat-container {
     width: 100% !important;
   }
+}
+
+/* ==========================================================================
+   16. DASHBOARD REGIONEN-CHART
+   ========================================================================== */
+.fm-dashboard-chart-card {
+  max-width: 600px;
+  padding: 24px;
+  background: var(--color-bg-white);
+  border: 1px solid var(--color-border-card);
+  border-radius: 12px;
+  margin-top: 30px;
+}
+
+.fm-dashboard-chart-card h3 {
+  margin-top: 0;
+  margin-bottom: 16px;
+  color: var(--color-text-title);
+  font-size: 1.1rem;
+  font-weight: 600;
 }

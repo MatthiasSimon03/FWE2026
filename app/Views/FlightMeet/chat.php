@@ -1,7 +1,7 @@
 <?= $this->extend('FlightMeet/layout') ?>
 <?= $this->section('content') ?>
 
-    <!-- Load date-fns via CDN (Zählt als 2. externe JS-Bibliothek für Ihr Uni-Projekt) -->
+    <!-- Load date-fns via CDN -->
     <script src="https://cdn.jsdelivr.net/npm/date-fns@3.6.0/cdn.min.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/date-fns@3.6.0/locale/de/cdn.min.js"></script>
 
@@ -57,7 +57,6 @@
         </div>
 
         <!-- Rechter Hauptbereich (Das Chatfenster) -->
-        <!-- Rechter Hauptbereich (Das Chatfenster) -->
         <div class="fm-chat-window">
 
             <!-- Chat Header mit responsivem Zurück-Button -->
@@ -68,13 +67,13 @@
                 <span id="chat-header-title" style="font-weight: 600;">Globaler Chat</span>
             </div>
 
-            <!-- Nachrichtenverlauf (bleibt gleich) -->
+            <!-- Nachrichtenverlauf -->
             <div class="fm-chat-messages-scroll" id="chat-messages-area">
                 <button class="fm-chat-load-more-btn" id="load-more-btn" style="display:none;">Ältere Nachrichten laden</button>
                 <div id="messages-container" style="display: flex; flex-direction: column; gap: 14px;"></div>
             </div>
 
-            <!-- Eingabebereich (bleibt gleich) -->
+            <!-- Eingabebereich -->
             <div class="fm-chat-input-area">
                 <form class="fm-chat-input-form" id="chat-submit-form" onsubmit="return false;">
                     <input type="text" id="chat-text-input" class="fm-chat-text-input" placeholder="Nachricht schreiben..." autocomplete="off" required>

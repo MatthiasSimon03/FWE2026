@@ -1,6 +1,6 @@
 <?php
 
-namespace app\Models\FlightMeet;
+namespace App\Models\FlightMeet;
 
 use CodeIgniter\Model;
 
@@ -20,6 +20,27 @@ class UserModel extends Model
     public function getUserByEmail(string $email)
     {
         return $this->where(['email' => $email])->first();
+    }
+
+    // Holt alle anderen Piloten
+    public function getOtherPilots(int $currentUserId): array
+    {
+        return $this->select('id, username, experience_level')
+            ->where('id !=', $currentUserId)
+            ->orderBy('username', 'ASC')
+            ->findAll();
+    }
+
+    // Holt alle Gruppen in denen der User Mitglied ist
+    public function getUserGroups(int $userId): array
+    {
+        return $this->db->table('fm_groups g')
+            ->select('g.id, g.name')
+            ->join('fm_group_members m', 'm.group_id = g.id')
+            ->where('m.user_id', $userId)
+            ->orderBy('g.name', 'ASC')
+            ->get()
+            ->getResultArray();
     }
 
     public function createUser(string $username, string $email, string $password, string $experience_level)

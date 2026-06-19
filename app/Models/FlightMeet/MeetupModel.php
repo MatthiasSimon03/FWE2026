@@ -120,6 +120,18 @@ class MeetupModel extends Model
         return $meetup ?: [];
     }
 
+    // Holt alle Meetups, in denen der User angemeldet ist
+    public function getUserMeetups(int $userId): array
+    {
+        return $this->db->table($this->table . ' fm')
+            ->select('fm.id, fm.title')
+            ->join('fm_flight_meet_participants p', 'p.flight_meet_id = fm.id')
+            ->where('p.user_id', $userId)
+            ->orderBy('fm.title', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
+
     public function getFilterOptions(): array
     {
         $regions = $this->db->table($this->table)
@@ -240,6 +252,15 @@ class MeetupModel extends Model
         }
 
         return $meetupId ? (int)$meetupId : null;
+    }
+
+    public function getActiveMeetupsCountByRegion(): array
+    {
+        return $this->select('region, COUNT(id) as count')
+            ->whereIn('status', ['geplant', 'ausgebucht']) // Filtert nur aktive, zukünftige Treffen
+            ->groupBy('region')
+            ->orderBy('count', 'DESC')
+            ->findAll();
     }
 
     public function autoClosePastMeetups(): void

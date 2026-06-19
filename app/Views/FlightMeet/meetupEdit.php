@@ -37,11 +37,11 @@
                 <div class="fm-form-grid fm-form-grid--two-cols">
                     <label class="fm-field">
                         <span class="fm-field__label">Datum</span>
-                        <input class="fm-field__input" type="date" name="meet_date" value="<?= esc(old('meet_date', $meetup['meet_date'])) ?>" required>
+                        <input class="fm-field__input" id="meet_date" type="text" name="meet_date" value="<?= esc(old('meet_date', $meetup['meet_date'])) ?>" required>
                     </label>
                     <label class="fm-field">
                         <span class="fm-field__label">Uhrzeit</span>
-                        <input class="fm-field__input" type="time" name="meet_time" value="<?= esc(old('meet_time', date('H:i', strtotime($meetup['meet_time'])))) ?>" required>
+                        <input class="fm-field__input" id="meet_time" type="text" name="meet_time" value="<?= esc(old('meet_time', date('H:i', strtotime($meetup['meet_time'])))) ?>" required>
                     </label>
                 </div>
 

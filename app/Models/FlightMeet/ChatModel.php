@@ -11,9 +11,8 @@ class ChatModel extends Model
     protected $allowedFields = ['sender_id', 'message_text', 'group_id', 'flight_meet_id', 'recipient_id', 'created_at'];
     protected $returnType = 'array';
 
-    /**
-     * Holt alle Nachrichten für einen bestimmten Kontext (Global, DM, Group, Meetup) mit Offset für "Mehr laden".
-     */
+
+    // Holt alle Nachrichten für einen bestimmten Kontext (Global, DM, Group, Meetup) mit Offset für "Mehr laden".
     public function getMessages(string $type, ?int $targetId, int $currentUserId, int $limit = 50, int $offset = 0): array
     {
         $builder = $this->db->table($this->table . ' m')
@@ -52,9 +51,8 @@ class ChatModel extends Model
         return array_reverse($results);
     }
 
-    /**
-     * Prüft, ob ein Nutzer berechtigt ist, in einer Gruppe zu schreiben/lesen.
-     */
+
+    // Prüft, ob ein Nutzer berechtigt ist, in einer Gruppe zu schreiben/lesen.
     public function isGroupMember(int $groupId, int $userId): bool
     {
         return $this->db->table('fm_group_members')
@@ -73,4 +71,16 @@ class ChatModel extends Model
                 ->where('user_id', $userId)
                 ->countAllResults() > 0;
     }
+
+    // Holt alle anderen Piloten außer dem aktuellen Nutzer für die DM-Auswahl.
+    public function getOtherPilots(int $currentUserId): array
+    {
+        return $this->db->table('fm_users')
+            ->select('id, username, experience_level')
+            ->where('id !=', $currentUserId)
+            ->orderBy('username', 'ASC')
+            ->get()->getResultArray();
+    }
+
+
 }

@@ -12,6 +12,11 @@
     <!-- Icons -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
 
+    <!-- Flatpickr CSS laden -->
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
+
+
     <link rel="stylesheet" href="<?= base_url('assets/css/flightmeet.css') ?>">
     <link rel="icon" href="<?= base_url('assets/icons/favicon.ico') ?>">
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
@@ -34,6 +39,10 @@
 </footer>
 
 <script src="<?= base_url('assets/js/flightmeet.js') ?>"></script>
+
+<!-- Flatpickr JS & Deutsche Lokalisierung laden -->
+<script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+<script src="https://cdn.jsdelivr.net/npm/flatpickr/dist/l10n/de.js"></script>
 
 </body>
 </html>
