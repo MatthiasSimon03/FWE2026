@@ -10,6 +10,7 @@
     <div class="actions">
         <a class="btn" href="<?= base_url('flightmeet/meetups') ?>">Zu den Flugtreffen</a>
         <a class="btn btn-secondary" href="<?= base_url('flightmeet/groups') ?>">Zu den Gruppen</a>
+        <a class="btn btn-secondary" href="https://leonardrichertz.github.io/vario/dev/"> Zum Variometer (extern)</a>
     </div>
 
     <!-- DIAGRAMM-BEREICH (Schnittstelle für externes JS über data-stats) -->

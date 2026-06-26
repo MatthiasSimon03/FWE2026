@@ -120,7 +120,7 @@
                             <!-- User nimmt bereits teil -> Absagen -->
                             <form method="post" action="<?= base_url('flightmeet/meetups/leave/' . $meetup['id']) ?>" style="width:100%;">
                                 <?= csrf_field() ?>
-                                <button class="btn-danger-full" type="submit">Absagen</button>
+                                <button class="btn-danger-full" type="submit">Teilnahme Absagen</button>
                             </form>
                         <?php else: ?>
                             <!-- User nimmt noch nicht teil -> Teilnehmen -->
