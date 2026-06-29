@@ -65,8 +65,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	});
 
 	// 4. MAP-PICKER LOGIK (NUR AKTIV BEIM ERSTELLEN/BEARBEITEN)
-	// Sorgt dafür, dass man die Karte nutzen kann, um Koordinaten zu setzen
-	// Wird eine Region	festgelegt, springt die Karte automatisch dorthin
 	const mapPickerEl = document.getElementById('map-picker');
 
 	if (mapPickerEl && typeof L !== 'undefined') {
@@ -130,7 +128,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 		const regionInput = document.getElementById('region');
 
-		// Wenn eine Region ausgewählt wird, springt die Karte automatisch dorthin
 		if (regionInput) {
 			regionInput.addEventListener('change', function() {
 				const query = this.value.trim();
@@ -161,7 +158,6 @@ document.addEventListener('DOMContentLoaded', () => {
 	}
 
 	// 5. ASYNCHRONES CHATSYSTEM (POLLING, SENDEN, DATUM-FNS)
-
 	const messagesArea = document.getElementById('chat-messages-area');
 	const messagesContainer = document.getElementById('messages-container');
 	const loadMoreBtn = document.getElementById('load-more-btn');
@@ -177,7 +173,6 @@ document.addEventListener('DOMContentLoaded', () => {
 		let isInitialLoad = true;
 		const BASE_CHAT_URL = 'chat';
 
-		// Beim Anklicken eines Chats in der Chatliste wird der entsprechende Chat geöffnet, die Oberfläche aktualisiert und die Nachrichten geladen werden.
 		document.querySelectorAll('.fm-chat-item').forEach((item) => {
 			item.addEventListener('click', () => {
 				document.querySelectorAll('.fm-chat-item').forEach(el => el.classList.remove('is-active'));
@@ -188,7 +183,6 @@ document.addEventListener('DOMContentLoaded', () => {
 				currentOffset = 0;
 				isInitialLoad = true;
 
-				//	Chat-Header aktualisieren
 				if (chatHeaderTitle) {
 					if (currentType === 'global') {
 						chatHeaderTitle.innerText = "Globaler Chat";
@@ -199,7 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
 					}
 				}
 
-				// UI-Bereinigen, damit	die neuen Nachrichten geladen werden können
 				messagesContainer.innerHTML = '';
 				loadMoreBtn.style.display = 'none';
 
@@ -208,13 +201,11 @@ document.addEventListener('DOMContentLoaded', () => {
 					chatContainer.classList.add('show-chat-window');
 				}
 
-				//	Nachrichten laden und Nachrichten-Polling starten
 				loadMessages(false);
 				restartPolling();
 			});
 		});
 
-		// Back Button an kleinen Geräten, um zur Übersicht zu gelangen
 		const backBtn = document.getElementById('chat-back-btn');
 		if (backBtn) {
 			backBtn.addEventListener('click', () => {
@@ -233,7 +224,6 @@ document.addEventListener('DOMContentLoaded', () => {
 			restartPolling();
 		}
 
-		// Nachrichten laden mit Hilfe von AJAX (Chatcontroller)
 		function loadMessages(isLoadMore = false) {
 			const offset = isLoadMore ? currentOffset : 0;
 			const url = `${BASE_CHAT_URL}/getMessages?type=${currentType}&target_id=${currentTargetId || ''}&offset=${offset}`;
@@ -242,30 +232,22 @@ document.addEventListener('DOMContentLoaded', () => {
 				.then(response => response.json())
 				.then(data => {
 					if (data.success) {
-						// Merken des Zustands vor dem Rendern
 						const wasInitial = isInitialLoad;
 
 						renderMessages(data.messages, data.userId, isLoadMore);
 
 						if (isLoadMore) {
-							// Fall 1: Benutzer lädt aktiv ältere Nachrichten
 							if (data.messages.length < 50) {
-								// Keine weiteren Nachrichten mehr vorhanden
 								loadMoreBtn.style.display = 'none';
 							}
 						} else if (wasInitial) {
-							// Fall 2: Nur beim ALLERERSTEN Laden des Kanals steuern wir den Button
 							if (data.messages.length >= 50) {
-								// Es sind weitere Nachrichten vorhanden sein, also Button anzeigen
 								loadMoreBtn.style.display = 'block';
 							} else {
-								// Es sind keine weiteren Nachrichten vorhanden, also Button verstecken
 								loadMoreBtn.style.display = 'none';
 							}
-							isInitialLoad = false; // Initialer Ladevorgang ist hiermit abgeschlossen
+							isInitialLoad = false;
 						}
-
-						// Fehlerbehandlung
 					} else if (data.error) {
 						messagesContainer.innerHTML = '';
 						const errorPara = document.createElement('p');
@@ -282,11 +264,9 @@ document.addEventListener('DOMContentLoaded', () => {
 				.catch(err => console.error("Fehler beim Abrufen der Nachrichten:", err));
 		}
 
-		// Nachrichten rendern im Chatfenster
 		function renderMessages(messages, currentUserId, isLoadMore) {
 			const previousScrollHeight = messagesArea.scrollHeight;
 
-			// keine Nachrichten vorhanden
 			if (!isLoadMore && messages.length === 0) {
 				messagesContainer.innerHTML = `
             <div class="fm-chat-empty-state">
@@ -296,7 +276,6 @@ document.addEventListener('DOMContentLoaded', () => {
 				return;
 			}
 
-			// Wenn beim "Ältere laden" keine Nachrichten mehr kommen, tun wir nichts weiter
 			if (isLoadMore && messages.length === 0) {
 				return;
 			}
@@ -305,16 +284,15 @@ document.addEventListener('DOMContentLoaded', () => {
 			let newMessagesCount = 0;
 
 			messages.forEach((msg) => {
-				if (document.getElementById(`msg-${msg.id}`)) return; // Nachricht existiert bereits, überspringen
+				if (document.getElementById(`msg-${msg.id}`)) return;
 
 				newMessagesCount++;
 				const wrapper = document.createElement('div');
 				const isMe = parseInt(msg.sender_id) === parseInt(currentUserId);
 				wrapper.id = `msg-${msg.id}`;
-				wrapper.className = `fm-msg-bubble-wrapper ${isMe ? 'is-me' : 'is-other'}`; // Unterscheidung zwischen eigenen und fremden Nachrichten
+				wrapper.className = `fm-msg-bubble-wrapper ${isMe ? 'is-me' : 'is-other'}`;
 
 				let formattedTime = "";
-				// Zeitstempel formatieren mit date-fns (z.B. "vor 5 Minuten", "vor etwa 14 Stunden")
 				try {
 					formattedTime = dateFns.formatDistanceToNow(new Date(msg.created_at), {
 						addSuffix: true,
@@ -326,12 +304,10 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				const metaText = isMe ? formattedTime : `${msg.sender_name} • ${formattedTime}`;
 
-				// SICHERE DOM-ERSTELLUNG (Kein innerHTML für unbereinigten Text des Users!) [1]
 				const metaSpan = document.createElement('span');
 				metaSpan.className = 'fm-msg-meta';
 				metaSpan.textContent = metaText;
 
-				// Nachrichtentext
 				const bubbleDiv = document.createElement('div');
 				bubbleDiv.className = 'fm-msg-bubble';
 				bubbleDiv.textContent = msg.message_text;
@@ -341,17 +317,14 @@ document.addEventListener('DOMContentLoaded', () => {
 				fragment.appendChild(wrapper);
 			});
 
-			// Keine neuen Nachrichten, also nichts weiter tun
 			if (newMessagesCount === 0) {
 				return;
 			}
 
 			if (isLoadMore) {
-				// Ältere Nachrichten werden oben angehängt, daher vor den bestehenden Nachrichten einfügen
 				messagesContainer.insertBefore(fragment, messagesContainer.firstChild);
-				messagesArea.scrollTop = messagesArea.scrollHeight - previousScrollHeight; // Scrollposition beibehalten
+				messagesArea.scrollTop = messagesArea.scrollHeight - previousScrollHeight;
 			} else {
-				// normales Laden von Nachrichten
 				const isInitialLoad = messagesContainer.children.length === 0 || messagesContainer.querySelector('.fm-chat-empty-state');
 				const isNearBottom = messagesArea.scrollHeight - messagesArea.scrollTop - messagesArea.clientHeight < 150;
 
@@ -360,7 +333,6 @@ document.addEventListener('DOMContentLoaded', () => {
 					emptyState.remove();
 				}
 
-				// Neue Nachrichten werden unten angehängt
 				messagesContainer.appendChild(fragment);
 
 				if (isInitialLoad || isNearBottom) {
@@ -374,7 +346,6 @@ document.addEventListener('DOMContentLoaded', () => {
 			loadMessages(true);
 		});
 
-		// Nutzer schickt eine Nachricht ab
 		chatForm.addEventListener('submit', async (e) => {
 			e.preventDefault();
 
@@ -384,11 +355,9 @@ document.addEventListener('DOMContentLoaded', () => {
 				return;
 			}
 
-			// Button gegen Doppelklick schützen
 			const submitBtn = chatForm.querySelector('button[type="submit"]');
 
 			try {
-
 				if (submitBtn) {
 					submitBtn.disabled = true;
 				}
@@ -402,9 +371,6 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				formData.append('message_text', text);
 
-				// Optional: CSRF-Token mitsenden
-				// formData.append(csrfName, csrfHash);
-
 				const response = await fetch(`${BASE_CHAT_URL}/sendMessage`, {
 					method: 'POST',
 					body: formData,
@@ -413,7 +379,6 @@ document.addEventListener('DOMContentLoaded', () => {
 					}
 				});
 
-				// HTTP-Fehler erkennen
 				if (!response.ok) {
 					throw new Error(`HTTP ${response.status}`);
 				}
@@ -424,25 +389,15 @@ document.addEventListener('DOMContentLoaded', () => {
 					throw new Error(data.error || 'Nachricht konnte nicht gesendet werden.');
 				}
 
-				// Erst jetzt Eingabefeld leeren
 				chatInput.value = '';
-
-				// Fokus zurück ins Eingabefeld
 				chatInput.focus();
 
-				// Chat aktualisieren
 				await loadMessages(false);
 
 			} catch (error) {
-
 				console.error('Senden fehlgeschlagen:', error);
-
-				showError(
-					error.message || 'Beim Senden der Nachricht ist ein Fehler aufgetreten.'
-				);
-
+				showError(error.message || 'Beim Senden der Nachricht ist ein Fehler aufgetreten.');
 			} finally {
-
 				if (submitBtn) {
 					submitBtn.disabled = false;
 				}
@@ -453,14 +408,11 @@ document.addEventListener('DOMContentLoaded', () => {
 			messagesArea.scrollTop = messagesArea.scrollHeight;
 		}
 
-		// Verbessertes Polling: Verhindert Überlappungen bei langsamer Verbindung
 		function restartPolling() {
 			clearTimeout(pollingTimeout);
 
 			const poll = () => {
 				loadMessages(false).finally(() => {
-					// Erst wenn die Anfrage fertig (erfolgreich/fehlgeschlagen) ist,
-					// wird der Timer für die nächste Abfrage gestartet.
 					pollingTimeout = setTimeout(poll, 3000);
 				});
 			};
@@ -472,10 +424,8 @@ document.addEventListener('DOMContentLoaded', () => {
 	// 6. DASHBOARD REGIONEN-CHART (CHART.JS)
 	const regionChartEl = document.getElementById('regionChart');
 
-	// Prüfen, ob das Canvas-Element existiert und die Bibliothek geladen ist
 	if (regionChartEl && typeof Chart !== 'undefined') {
 		try {
-			// Daten aus dem HTML-Attribut data-stats (regionstats) auslesen und parsen
 			const rawData = JSON.parse(regionChartEl.dataset.stats || '[]');
 
 			const regions = rawData.map(item => item.region);
@@ -522,10 +472,9 @@ document.addEventListener('DOMContentLoaded', () => {
 	if (tableViewEl && typeof List !== 'undefined') {
 		new List('fmTableView', {
 			valueNames: [
-				'col-title',
+				{ name: 'col-title', attr: 'data-title' },
 				'col-spot',
 				'col-region',
-				// Sortiert nach dem Roh-Timestamp im Attribut, damit das Datumsformat die Sortierung nicht stört
 				{ name: 'col-date', attr: 'data-timestamp' }
 			]
 		});
@@ -537,20 +486,227 @@ document.addEventListener('DOMContentLoaded', () => {
 
 	if (dateInput && typeof flatpickr !== 'undefined') {
 		flatpickr(dateInput, {
-			locale: 'de',            // Deutsche Sprache aktivieren
-			dateFormat: 'Y-m-d',     // Entspricht dem MySQL-DATE-Format (YYYY-MM-DD)
-			minDate: 'today',        // Verhindert das Buchen von Terminen in der Vergangenheit
-			allowInput: false        // Verhindert manuelle Tastatur-Eingaben
+			locale: 'de',
+			dateFormat: 'Y-m-d',
+			minDate: 'today',
+			allowInput: false
 		});
 	}
 
 	if (timeInput && typeof flatpickr !== 'undefined') {
 		flatpickr(timeInput, {
 			locale: 'de',
-			enableTime: true,        // Zeit-Auswahl aktivieren
-			noCalendar: true,        // Kalender ausblenden (nur Zeit zeigen)
-			dateFormat: 'H:i',       // Entspricht dem MySQL-TIME-Format (HH:MM)
-			time_24hr: true          // 24-Stunden-Format erzwingen
+			enableTime: true,
+			noCalendar: true,
+			dateFormat: 'H:i',
+			time_24hr: true
 		});
 	}
+
+	// 9. GENERISCHER TAB-SWITCHER (Muss direkt im Haupt-DOMContentLoaded-Block registriert werden)
+	document.querySelectorAll('[data-tab-target]').forEach(button => {
+		button.addEventListener('click', () => {
+			const container = button.closest('.fm-detail-layout') || document;
+
+			container.querySelectorAll('[data-tab-target]').forEach(btn => btn.classList.remove('is-active'));
+			button.classList.add('is-active');
+
+			container.querySelectorAll('.tab-content').forEach(content => content.style.display = 'none');
+
+			const targetId = button.dataset.tabTarget;
+			const targetContent = document.getElementById(targetId);
+			if (targetContent) {
+				targetContent.style.display = 'block';
+			}
+
+			if (targetId.includes('map') && typeof activeMapInstance !== 'undefined' && activeMapInstance) {
+				setTimeout(() => {
+					activeMapInstance.invalidateSize();
+				}, 100);
+			}
+		});
+	});
 });
+
+// ==========================================================================
+// DEKLARATIONEN AUSSERHALB (Für globale Sichtbarkeit / window-Scope)
+// ==========================================================================
+
+let activeMapInstance = null;
+
+function initDynamicFlightsMap(mapId) {
+	const mapEl = document.getElementById(mapId);
+	if (!mapEl || typeof L === 'undefined') return;
+
+	const baseLat = mapEl.dataset.baseLat ? parseFloat(mapEl.dataset.baseLat) : null;
+	const baseLng = mapEl.dataset.baseLng ? parseFloat(mapEl.dataset.baseLng) : null;
+	const baseName = mapEl.dataset.baseName || '';
+	const flights = JSON.parse(mapEl.dataset.flights || '[]');
+	const iconUrl = mapEl.dataset.iconUrl;
+	const baseUrl = mapEl.dataset.baseUrl || '';
+	const fromGroupParam = mapEl.dataset.fromGroup ? `?from_group=${mapEl.dataset.fromGroup}` : '';
+
+	const startLat = baseLat || 49.7552;
+	const startLng = baseLng || 6.6394;
+	const startZoom = baseLat ? 7 : 5;
+
+	activeMapInstance = L.map(mapId).setView([startLat, startLng], startZoom);
+
+	L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+		attribution: '&copy; OpenStreetMap-Mitwirkende'
+	}).addTo(activeMapInstance);
+
+	const bounds = [];
+
+	if (baseLat && baseLng) {
+		const baseMarker = L.marker([baseLat, baseLng]).addTo(activeMapInstance);
+		bounds.push([baseLat, baseLng]);
+	}
+
+	let flightIcon = null;
+	if (iconUrl) {
+		flightIcon = L.icon({
+			iconUrl: iconUrl,
+			iconSize: [36, 36],
+			iconAnchor: [18, 36],
+			popupAnchor: [0, -36]
+		});
+	}
+
+	flights.forEach(flight => {
+		if (flight.latitude && flight.longitude) {
+			const lat = parseFloat(flight.latitude);
+			const lng = parseFloat(flight.longitude);
+
+			const markerOptions = flightIcon ? { icon: flightIcon } : {};
+			const marker = L.marker([lat, lng], markerOptions).addTo(activeMapInstance);
+
+			const dateStr = new Date(flight.meet_date).toLocaleDateString('de-DE');
+			const popupContent = `
+            <div style="font-size: 0.9rem;">
+                <h4 style="margin: 0 0 4px 0;">
+                    <a href="${baseUrl}flightmeet/meetups/${flight.id}${fromGroupParam}" style="color: var(--color-primary); font-weight: 700; text-decoration: none;">
+                        ${flight.title}
+                    </a>
+                </h4>
+                <p style="margin: 2px 0;"><i class="ph ph-map-pin" style="vertical-align: middle; margin-right: 4px;"></i>${flight.location}</p>
+                <p style="margin: 2px 0;"><i class="ph ph-calendar" style="vertical-align: middle; margin-right: 4px;"></i>${dateStr} - ${flight.meet_time.substring(0,5)} Uhr</p>
+            </div>
+        `;
+			marker.bindPopup(popupContent);
+			bounds.push([lat, lng]);
+		}
+	});
+
+}
+
+class DynamicFlightCalendar {
+	constructor(containerId, flightsData, baseUrl, groupId = '') {
+		this.grid = document.getElementById(`${containerId}-grid`);
+		this.title = document.getElementById(`${containerId}-title`);
+		this.flightsData = flightsData;
+		this.baseUrl = baseUrl;
+		this.groupId = groupId;
+		this.currentDate = new Date();
+
+		this.monate = [
+			"Januar", "Februar", "März", "April", "Mai", "Juni",
+			"Juli", "August", "September", "Oktober", "November", "Dezember"
+		];
+	}
+
+	render() {
+		if (!this.grid || !this.title) return;
+
+		this.grid.innerHTML = '';
+		const year = this.currentDate.getFullYear();
+		const month = this.currentDate.getMonth();
+
+		this.title.innerText = `${this.monate[month]} ${year}`;
+
+		const wochentage = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
+		wochentage.forEach(day => {
+			const el = document.createElement('div');
+			el.className = 'fm-calendar-weekday';
+			el.innerText = day;
+			this.grid.appendChild(el);
+		});
+
+		const firstDayIndex = new Date(year, month, 1).getDay();
+		const leadDays = firstDayIndex === 0 ? 6 : firstDayIndex - 1;
+
+		const daysInMonth = new Date(year, month + 1, 0).getDate();
+		const daysInPrevMonth = new Date(year, month, 0).getDate();
+
+		for (let i = leadDays - 1; i >= 0; i--) {
+			const el = document.createElement('div');
+			el.className = 'fm-calendar-day other-month';
+			el.innerHTML = `<span class="fm-calendar-day-num">${daysInPrevMonth - i}</span>`;
+			this.grid.appendChild(el);
+		}
+
+		const today = new Date();
+		for (let day = 1; day <= daysInMonth; day++) {
+			const el = document.createElement('div');
+			el.className = 'fm-calendar-day';
+
+			if (today.getDate() === day && today.getMonth() === month && today.getFullYear() === year) {
+				el.classList.add('today');
+			}
+
+			el.innerHTML = `<span class="fm-calendar-day-num">${day}</span>`;
+
+			const checkMonth = String(month + 1).padStart(2, '0');
+			const checkDay = String(day).padStart(2, '0');
+			const cellDateStr = `${year}-${checkMonth}-${checkDay}`;
+
+			const dayEvents = this.flightsData.filter(flight => flight.meet_date === cellDateStr);
+
+			if (dayEvents.length > 0) {
+				const eventsDiv = document.createElement('div');
+				eventsDiv.className = 'fm-calendar-events';
+
+				dayEvents.forEach(evt => {
+					const evtLink = document.createElement('a');
+					const statusClass = evt.status || 'geplant';
+					evtLink.className = `fm-calendar-event fm-calendar-event--${statusClass}`;
+
+					const fromGroupParam = this.groupId ? `?from_group=${this.groupId}` : '';
+					evtLink.href = `${this.baseUrl}flightmeet/meetups/${evt.id}${fromGroupParam}`;
+
+					const timeStr = evt.meet_time ? evt.meet_time.substring(0, 5) : '00:00';
+					evtLink.title = `${evt.title} (${timeStr} Uhr)`;
+					evtLink.innerText = `${timeStr} - ${evt.title}`;
+					eventsDiv.appendChild(evtLink);
+				});
+
+				el.appendChild(eventsDiv);
+			}
+
+			this.grid.appendChild(el);
+		}
+
+		const totalCells = this.grid.children.length - 7;
+		const remainingCells = (7 - (totalCells % 7)) % 7;
+		for (let i = 1; i <= remainingCells; i++) {
+			const el = document.createElement('div');
+			el.className = 'fm-calendar-day other-month';
+			el.innerHTML = `<span class="fm-calendar-day-num">${i}</span>`;
+			this.grid.appendChild(el);
+		}
+	}
+
+	prev() {
+		this.currentDate.setMonth(this.currentDate.getMonth() - 1);
+		this.render();
+	}
+
+	next() {
+		this.currentDate.setMonth(this.currentDate.getMonth() + 1);
+		this.render();
+	}
+}
+
+// Global registrieren für window-Scope
+window.initDynamicFlightsMap = initDynamicFlightsMap;
+window.DynamicFlightCalendar = DynamicFlightCalendar;

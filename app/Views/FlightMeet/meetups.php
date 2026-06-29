@@ -156,15 +156,13 @@
             <?php else: ?>
                 <?php foreach ($meetups as $meetup): ?>
                     <tr class="fm-row-link">
-                        <!-- NEU: Klasse 'col-title' hinzugefügt -->
-                        <td class="fm-row-link__cell col-title">
+                        <td class="fm-row-link__cell col-title" data-title="<?= esc($meetup['title']) ?>">
                             <a class="fm-row-link__anchor" href="<?= base_url('flightmeet/meetups/' . $meetup['id']) ?>">
                                 <?= esc($meetup['title']) ?>
                             </a>
                         </td>
                         <td class="col-spot"><?= esc($meetup['location']) ?></td>
                         <td><span class="fm-badge-region col-region"><?= esc($meetup['region']) ?></span></td>
-                        <!-- NEU: Klasse 'col-date' direkt auf das td-Element gelegt -->
                         <td class="fm-table__date col-date" data-timestamp="<?= strtotime($meetup['meet_date']) ?>">
                             <?= date('d.m.Y', strtotime($meetup['meet_date'])) ?>
                         </td>

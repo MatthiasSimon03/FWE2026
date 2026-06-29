@@ -43,7 +43,8 @@ class MeetupModel extends Model
                 . 'COUNT(p.user_id) AS participants_count'
             )
             ->join('fm_flight_meet_participants p', 'p.flight_meet_id = fm.id', 'left')
-            ->groupBy('fm.id');
+            ->groupBy('fm.id')
+            ->orderBy('fm.meet_date', 'ASC');
 
         if ($region !== '') {
             $builder->where('fm.region', $region);
@@ -128,6 +129,41 @@ class MeetupModel extends Model
             ->join('fm_flight_meet_participants p', 'p.flight_meet_id = fm.id')
             ->where('p.user_id', $userId)
             ->orderBy('fm.title', 'ASC')
+            ->get()
+            ->getResultArray();
+    }
+
+    /**
+     * Holt alle Flugtreffen, bei denen der User Ersteller ODER Teilnehmer ist
+     */
+    public function getFullUserMeetups(int $userId, array $statuses = []): array
+    {
+        $this->autoClosePastMeetups();
+
+        $builder = $this->db->table($this->table . ' fm')
+            ->select(
+                'fm.id, fm.creator_id, fm.title, fm.location, fm.region, fm.description, fm.meet_date, fm.meet_time, '
+                . 'fm.experience_level, fm.creator_is_private, fm.max_participants, fm.status, fm.longitude, fm.latitude, '
+                . 'COUNT(p_all.user_id) AS participants_count, u.username as creator_name'
+            )
+            // JOIN 1: Prüfen, ob der User Teilnehmer ist
+            ->join('fm_flight_meet_participants p_filter', 'p_filter.flight_meet_id = fm.id AND p_filter.user_id = ' . $userId, 'left')
+            // JOIN 2: Alle Teilnehmer für den Counter laden
+            ->join('fm_flight_meet_participants p_all', 'p_all.flight_meet_id = fm.id', 'left')
+            // JOIN 3: Ersteller-Name auflösen
+            ->join('fm_users u', 'u.id = fm.creator_id')
+            ->groupStart()
+            ->where('fm.creator_id', $userId)
+            ->orWhere('p_filter.user_id', $userId)
+            ->groupEnd();
+
+        if (!empty($statuses)) {
+            $builder->whereIn('fm.status', $statuses);
+        }
+
+        return $builder->groupBy('fm.id')
+            ->orderBy('fm.meet_date', 'ASC')
+            ->orderBy('fm.meet_time', 'ASC')
             ->get()
             ->getResultArray();
     }

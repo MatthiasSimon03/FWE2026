@@ -138,8 +138,14 @@
                         </form>
                     <?php endif; ?>
 
-                    <!-- Link zurück zur Übersicht -->
-                    <a class="btn-secondary-full" href="<?= base_url('flightmeet/meetups') ?>">Zurück zur Übersicht</a>
+                    <!-- Link zurück zur Übersicht (dynamisch je nach Herkunft) -->
+                    <?php if (!empty($from_group)): ?>
+                        <a class="btn-secondary-full" href="<?= base_url('flightmeet/groups/detail/' . esc($from_group)) ?>">
+                            Zurück zur Gruppe
+                        </a>
+                    <?php else: ?>
+                        <a class="btn-secondary-full" href="<?= base_url('flightmeet/meetups') ?>">Zurück zur Übersicht</a>
+                    <?php endif; ?>
                 </div>
 
                 <hr class="fm-divider">
@@ -173,7 +179,7 @@
             attribution: '&copy; OpenStreetMap-Mitwirkende'
         }).addTo(map);
         var paragliderIcon = L.icon({
-            iconUrl: '../../assets/icons/paraglider.png',
+            iconUrl: '<?= base_url('assets/icons/paraglider.png') ?>',
 
             iconSize: [40, 40],      // Breite, Höhe
             iconAnchor: [20, 40],    // Punkt des Icons auf der Koordinate

@@ -14,7 +14,7 @@ $routes->get('overview', 'OverviewController::index');
 $routes->group('flightmeet', ['filter' => 'fm_auth', 'namespace' => 'App\Controllers\FlightMeet'], static function ($routes) {
     $routes->get('/', 'Home::index');
     $routes->get('meetups', 'MeetupController::index');
-    $routes->get('groups', 'GroupController::index');
+
     $routes->get('chat', 'ChatController::index');
     $routes->get('profile', 'ProfileController::index');
 
@@ -27,6 +27,26 @@ $routes->group('flightmeet', ['filter' => 'fm_auth', 'namespace' => 'App\Control
 
     $routes->get('chat/getMessages', 'ChatController::getMessages');
     $routes->post('chat/sendMessage', 'ChatController::sendMessage');
+
+    // FlightMeet Gruppen
+    $routes->get('groups', 'GroupController::index');
+    $routes->match(['get', 'post'], 'groups/create', 'GroupController::create');
+    $routes->get('groups/detail/(:num)', 'GroupController::detail/$1');
+    $routes->match(['get', 'post'], 'groups/edit/(:num)', 'GroupController::edit/$1');
+    $routes->post('groups/delete/(:num)', 'GroupController::delete/$1');
+
+    // Beitritts- & Anfrage-Routen
+    $routes->post('groups/join/(:num)', 'GroupController::join/$1');
+    $routes->post('groups/leave/(:num)', 'GroupController::leave/$1');
+    $routes->post('groups/request-join/(:num)', 'GroupController::requestJoin/$1');
+    $routes->post('groups/approve-request/(:num)', 'GroupController::approveRequest/$1');
+    $routes->post('groups/reject-request/(:num)', 'GroupController::rejectRequest/$1');
+
+    // Rollen-Management (Befördern / Herabstufen / Löschen von Mitgliedern)
+    $routes->post('groups/promote/(:num)/(:num)', 'GroupController::promoteToAdmin/$1/$2');
+    $routes->post('groups/demote/(:num)/(:num)', 'GroupController::demoteFromAdmin/$1/$2');
+    $routes->post('groups/transfer-owner/(:num)/(:num)', 'GroupController::transferOwner/$1/$2');
+    $routes->post('groups/remove-member/(:num)/(:num)', 'GroupController::removeMember/$1/$2');
 });
 
 // FlightMeet Login (ohne Filter, der Zugriff schützt)

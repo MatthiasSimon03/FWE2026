@@ -17,16 +17,30 @@ class MeetupController extends BaseController
 
     public function index(): ResponseInterface
     {
+        // 1. Alle GET-Parameter abrufen
+        $allGetParams = $this->request->getGet();
+
+        // 2. Unterscheiden: Erster Aufruf vs. aktives Abschicken des Formulars
+        if (empty($allGetParams)) {
+            // Keine Parameter vorhanden -> Erster Aufruf / Zurücksetzen -> Standardwert setzen
+            $status = ['geplant'];
+        } else {
+            // Formular wurde abgeschickt. Wenn keine Checkboxen angehakt sind,
+            // ist der Parameter 'status' null, was wir als leeres Array interpretieren.
+            $statusParam = $this->request->getGet('status');
+            if ($statusParam === null) {
+                $status = [];
+            } else {
+                $status = is_array($statusParam) ? $statusParam : [];
+            }
+        }
+
         $filters = [
             'q'      => (string) ($this->request->getGet('q') ?? ''),
             'region' => (string) ($this->request->getGet('region') ?? ''),
             'level'  => (string) ($this->request->getGet('level') ?? ''),
-            'status' => ($this->request->getGet('status') ?? []),
+            'status' => $status,
         ];
-
-        if (!is_array($filters['status'])) {
-            $filters['status'] = [];
-        }
 
         $options = $this->meetupModel->getFilterOptions();
 
@@ -50,10 +64,14 @@ class MeetupController extends BaseController
                 ->with('error', 'Flugtreffen wurde nicht gefunden.');
         }
 
+        $fromGroup = $this->request->getGet('from_group');
+        $meetup['from_group'] = $fromGroup ? (int)$fromGroup : null;
+
         return $this->response->setBody(view('FlightMeet/meetupDetail', [
             'title'  => 'FlightMeet - Detail',
             'active' => 'meetups',
             'meetup' => $meetup,
+            'from_group' => $meetup['from_group'],
         ]));
     }
 
