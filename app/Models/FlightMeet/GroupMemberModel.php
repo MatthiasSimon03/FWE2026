@@ -41,7 +41,6 @@ class GroupMemberModel extends Model
             ->select('gm.*, u.username, u.experience_level, u.email')
             ->join('fm_users u', 'u.id = gm.user_id')
             ->where('gm.group_id', $groupId)
-            // Das dritte Argument "false" deaktiviert das automatische Escaping für diesen rohen SQL-Ausdruck
             ->orderBy("FIELD(gm.role, 'owner', 'admin', 'member')", '', false)
             ->orderBy('u.username', 'ASC')
             ->get()

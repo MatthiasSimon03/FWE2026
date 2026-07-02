@@ -1,18 +1,30 @@
 <?= $this->extend('FlightMeet/layout') ?>
 <?= $this->section('content') ?>
 
-    <!-- NEU: Globale Feedback-Meldungen (Erfolg / Fehler) -->
-    <?php if (session()->getFlashdata('success')): ?>
-        <div class="alert alert-success">
-            <?= esc(session()->getFlashdata('success')) ?>
-        </div>
-    <?php endif; ?>
+    <style>
+        /* Rotations-Animation für den Lade-Spinner */
+        @keyframes spin {
+            from { transform: rotate(0deg); }
+            to { transform: rotate(360deg); }
+        }
+        .weather-spin {
+            animation: spin 1s linear infinite;
+            display: inline-block;
+        }
+    </style>
 
-    <?php if (session()->getFlashdata('error')): ?>
-        <div class="alert alert-error">
-            <?= esc(session()->getFlashdata('error')) ?>
-        </div>
-    <?php endif; ?>
+    <!-- NEU: Globale Feedback-Meldungen (Erfolg / Fehler) -->
+<?php if (session()->getFlashdata('success')): ?>
+    <div class="alert alert-success">
+        <?= esc(session()->getFlashdata('success')) ?>
+    </div>
+<?php endif; ?>
+
+<?php if (session()->getFlashdata('error')): ?>
+    <div class="alert alert-error">
+        <?= esc(session()->getFlashdata('error')) ?>
+    </div>
+<?php endif; ?>
 
     <div class="fm-detail-layout">
         <!-- Linker Bereich: Hauptinhalt & Karte -->
@@ -31,7 +43,7 @@
             </div>
         </div>
 
-        <!-- Rechter Bereich: Info-Card, Teilnehmer & Aktionen -->
+        <!-- Rechter Bereich: Info-Card, Wetter, Teilnehmer & Aktionen -->
         <div class="fm-detail-sidebar">
             <div class="fm-detail-card">
 
@@ -59,8 +71,6 @@
                         </div>
                     <?php endif; ?>
                 </h3>
-
-
 
                 <dl class="fm-detail-info-list">
                     <div class="fm-detail-info-item">
@@ -170,10 +180,41 @@
                     </ul>
                 <?php endif; ?>
             </div>
+
+            <!-- NEU: INTERAKTIVE WETTER-KARTE -->
+            <div class="fm-detail-card" style="margin-top: 20px;">
+                <h3 class="fm-detail-card-title" style="display: flex; align-items: center; gap: 8px; margin: 0 0 16px 0;">
+                    <i class="ph ph-cloud-sun" style="font-size: 1.3rem; color: var(--color-primary);"></i>
+                    <span>Wettervorhersage</span>
+                </h3>
+
+                <div id="weather-loading" style="color: var(--color-text-muted); font-size: 0.9rem;">
+                    <i class="ph ph-spinner-gap weather-spin"></i> Lade Wetterdaten...
+                </div>
+
+                <div id="weather-info" style="display: none;">
+                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
+                        <i id="weather-icon" class="ph" style="font-size: 2.5rem; color: var(--color-primary);"></i>
+                        <div>
+                            <span id="weather-temp" style="font-size: 1.4rem; font-weight: 700; color: var(--color-text-title);"></span>
+                            <p id="weather-desc" style="margin: 0; font-size: 0.9rem; color: var(--color-text-muted-dark);"></p>
+                        </div>
+                    </div>
+                    <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; border-top: 1px dashed var(--color-border-medium); padding-top: 12px;">
+                        <div style="display: flex; justify-content: space-between;">
+                            <span style="color: var(--color-text-muted);">Max. Windgeschwindigkeit:</span>
+                            <strong id="weather-wind"></strong>
+                        </div>
+                    </div>
+                </div>
+
+                <p id="weather-error" style="display: none; color: var(--color-text-muted-light); font-size: 0.85rem; font-style: italic; margin: 0;"></p>
+            </div>
         </div>
     </div>
 
     <script>
+        // LEAFLET MAP INITIALISIERUNG
         const map = L.map('map').setView([<?= esc($meetup['latitude']) ?>, <?= esc($meetup['longitude']) ?>], 10);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap-Mitwirkende'
@@ -186,6 +227,95 @@
             popupAnchor: [0, -40]    // Position des Popups relativ zum Icon
         });
         var marker = L.marker([<?= esc($meetup['latitude']) ?>, <?= esc($meetup['longitude']) ?>], {icon: paragliderIcon}).addTo(map);
+
+        // ASYNCHRONER WETTER-ABRUF (OPEN-METEO API)
+        document.addEventListener('DOMContentLoaded', () => {
+            const lat = <?= esc($meetup['latitude']) ?>;
+            const lng = <?= esc($meetup['longitude']) ?>;
+            const meetDate = '<?= esc($meetup['meet_date']) ?>';
+
+            const loadingEl = document.getElementById('weather-loading');
+            const infoEl = document.getElementById('weather-info');
+            const errorEl = document.getElementById('weather-error');
+
+            // Abgleich der Tage: Prognose ist bei Open-Meteo erst 14 Tage vor dem Termin verfügbar
+            const today = new Date();
+            today.setHours(0, 0, 0, 0);
+            const targetDate = new Date(meetDate);
+            targetDate.setHours(0, 0, 0, 0);
+
+            const diffTime = targetDate - today;
+            const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+
+            if (diffDays > 14) {
+                loadingEl.style.display = 'none';
+                errorEl.style.display = 'block';
+                errorEl.innerText = "🌤️ Vorhersage erst ab 14 Tage vor dem Treffen verfügbar.";
+                return;
+            }
+
+            // API URL bauen
+            const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max&timezone=auto&start_date=${meetDate}&end_date=${meetDate}`;
+
+            fetch(apiUrl)
+                .then(response => {
+                    if (!response.ok) throw new Error('Netzwerk-Antwort war nicht ok');
+                    return response.json();
+                })
+                .then(data => {
+                    if (!data.daily || !data.daily.weather_code) {
+                        throw new Error('Keine Wetterdaten verfügbar');
+                    }
+
+                    // WMO Weathercodes in Text & Phosphor Icons übersetzen
+                    const weatherCode = data.daily.weather_code[0];
+                    const tempMax = Math.round(data.daily.temperature_2m_max[0]);
+                    const tempMin = Math.round(data.daily.temperature_2m_min[0]);
+                    const windMax = Math.round(data.daily.wind_speed_10m_max[0]);
+
+                    const weatherMap = {
+                        0: { desc: 'Sonnig/Wolkenlos', icon: 'ph-sun' },
+                        1: { desc: 'Meist klar', icon: 'ph-sun' },
+                        2: { desc: 'Teilweise bewölkt', icon: 'ph-cloud-sun' },
+                        3: { desc: 'Bedeckt', icon: 'ph-cloud' },
+                        45: { desc: 'Nebel', icon: 'ph-cloud-fog' },
+                        48: { desc: 'Raureifnebel', icon: 'ph-cloud-fog' },
+                        51: { desc: 'Leichter Sprühregen', icon: 'ph-cloud-rain' },
+                        53: { desc: 'Mäßiger Sprühregen', icon: 'ph-cloud-rain' },
+                        55: { desc: 'Dichter Sprühregen', icon: 'ph-cloud-rain' },
+                        61: { desc: 'Leichter Regen', icon: 'ph-cloud-rain' },
+                        63: { desc: 'Mäßiger Regen', icon: 'ph-cloud-rain' },
+                        65: { desc: 'Starker Regen', icon: 'ph-cloud-heavy-rain' },
+                        71: { desc: 'Leichter Schneefall', icon: 'ph-snowflake' },
+                        73: { desc: 'Mäßiger Schneefall', icon: 'ph-snowflake' },
+                        75: { desc: 'Starker Schneefall', icon: 'ph-snowflake' },
+                        80: { desc: 'Leichte Regenschauer', icon: 'ph-cloud-rain' },
+                        81: { desc: 'Mäßige Regenschauer', icon: 'ph-cloud-rain' },
+                        82: { desc: 'Starke Regenschauer', icon: 'ph-cloud-heavy-rain' },
+                        95: { desc: 'Gewitter', icon: 'ph-cloud-lightning' }
+                    };
+
+                    const wDetails = weatherMap[weatherCode] || { desc: 'Bedeckt', icon: 'ph-cloud' };
+
+                    // Elemente befüllen
+                    document.getElementById('weather-temp').innerText = `${tempMax}°C / ${tempMin}°C`;
+                    document.getElementById('weather-desc').innerText = wDetails.desc;
+                    document.getElementById('weather-wind').innerText = `${windMax} km/h`;
+
+                    // Icon-Klasse dynamisch setzen
+                    const iconEl = document.getElementById('weather-icon');
+                    iconEl.className = `ph ${wDetails.icon}`;
+
+                    loadingEl.style.display = 'none';
+                    infoEl.style.display = 'block';
+                })
+                .catch(err => {
+                    console.error('Fehler beim Laden des Wetters:', err);
+                    loadingEl.style.display = 'none';
+                    errorEl.style.display = 'block';
+                    errorEl.innerText = "⚠️ Wetterdaten konnten nicht geladen werden.";
+                });
+        });
     </script>
 
 <?= $this->endSection() ?>

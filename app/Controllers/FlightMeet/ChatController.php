@@ -20,14 +20,29 @@ class ChatController extends Controller
         $this->meetupModel = new MeetupModel();
     }
 
+    /**
+     * Hauptansicht des Chats
+     */
     public function index()
     {
         $currentUserId = session()->get('fm_user_id');
 
-        // Komplette Auslagerung der Datenbanklogik in die entsprechenden Models
-        $pilots  = $this->userModel->getOtherPilots($currentUserId);
-        $groups  = $this->userModel->getUserGroups($currentUserId);
-        $meetups = $this->meetupModel->getUserMeetups($currentUserId);
+        // Sidebar-Inhalte laden (andere Piloten, Gruppen in denen User Mitglied ist, Treffen an denen er teilnimmt)
+        $pilots     = $this->userModel->getOtherPilots($currentUserId);
+        $groups     = $this->userModel->getUserGroups($currentUserId);
+        $allMeetups = $this->meetupModel->getUserMeetups($currentUserId);
+
+        $activeMeetups = [];
+        $pastMeetups = [];
+
+        // Treffen für Sidebar-Struktur aufteilen (geplant, ausgebucht / abgeschlossen, abgesagt)
+        foreach ($allMeetups as $m) {
+            if (in_array($m['status'], ['geplant', 'ausgebucht'], true)) {
+                $activeMeetups[] = $m;
+            } else {
+                $pastMeetups[] = $m;
+            }
+        }
 
         $targetUserId = $this->request->getGet('user');
 
@@ -36,22 +51,23 @@ class ChatController extends Controller
             'active'         => 'chat',
             'pilots'         => $pilots,
             'groups'         => $groups,
-            'meetups'        => $meetups,
+            'active_meetups' => $activeMeetups,
+            'past_meetups'   => $pastMeetups,
             'target_user_id' => $targetUserId ? (int)$targetUserId : null,
         ]));
     }
 
     /**
-     * AJAX Endpoint: Nachrichten abrufen
+     * AJAX Endpoint: Nachrichten für einen Chat laden (mit Offset für Lazy Loading)
      */
     public function getMessages()
     {
         $currentUserId = session()->get('fm_user_id');
-        $type = (string)$this->request->getGet('type');
-        $targetId = $this->request->getGet('target_id') !== null && $this->request->getGet('target_id') !== '' ? (int)$this->request->getGet('target_id') : null;
-        $offset = (int)($this->request->getGet('offset') ?? 0);
+        $type          = (string)$this->request->getGet('type');   // group, meetup, global, dm
+        $targetId      = $this->request->getGet('target_id') !== null && $this->request->getGet('target_id') !== '' ? (int)$this->request->getGet('target_id') : null;  // targetId ist die GruppenId, MeetId oder userId
+        $offset        = (int)($this->request->getGet('offset') ?? 0);
 
-        // Sicherheitsprüfungen
+        // Zugriffsschutz: Darf der User in dieser Gruppe / diesem Treffen mitlesen?
         if ($type === 'group' && !$this->chatModel->isGroupMember($targetId, $currentUserId)) {
             return $this->response->setJSON(['error' => 'Kein Gruppenmitglied.']);
         }
@@ -59,6 +75,7 @@ class ChatController extends Controller
             return $this->response->setJSON(['error' => 'Keine Anmeldung zu diesem Treffen gefunden.']);
         }
 
+        // Standardmäßig 50 Nachrichten laden, ältere werden bei Bedarf per Scroll nachgeladen
         $messages = $this->chatModel->getMessages($type, $targetId, $currentUserId, 50, $offset);
 
         return $this->response->setJSON([
@@ -69,21 +86,21 @@ class ChatController extends Controller
     }
 
     /**
-     * AJAX Endpoint: Nachricht absenden
+     * AJAX Endpoint: Neue Nachricht speichern
      */
     public function sendMessage()
     {
         $currentUserId = session()->get('fm_user_id');
-        $type = (string)$this->request->getPost('type');
-        $targetId = $this->request->getPost('target_id') !== null && $this->request->getPost('target_id') !== '' ? (int)$this->request->getPost('target_id') : null;
-        $messageText = trim((string)$this->request->getPost('message_text'));
+        $type          = (string)$this->request->getPost('type');
+        $targetId      = $this->request->getPost('target_id') !== null && $this->request->getPost('target_id') !== '' ? (int)$this->request->getPost('target_id') : null;
+        $messageText   = trim((string)$this->request->getPost('message_text'));
 
-        // 1. Validierung der Nachricht (Inhalt & Zeichenbegrenzung gegen Denial of Service)
+        // Spam-Schutz & Payload-Limitierung
         if (empty($messageText) || mb_strlen($messageText) > 2000) {
             return $this->response->setJSON(['error' => 'Nachricht darf nicht leer sein und maximal 2000 Zeichen enthalten.']);
         }
 
-        // 2. Autorisierungsprüfung für Gruppen und Treffen
+        // Berechtigungsprüfung vor dem Schreiben
         if ($type === 'group' && !$this->chatModel->isGroupMember($targetId, $currentUserId)) {
             return $this->response->setJSON(['error' => 'Nicht autorisiert.']);
         }
@@ -91,7 +108,7 @@ class ChatController extends Controller
             return $this->response->setJSON(['error' => 'Nicht autorisiert.']);
         }
 
-        // 3. Sicherheitsvalidierung: Existiert der Empfänger bei Direktnachrichten (DMs)?
+        // Empfänger-Existenz bei Direktnachrichten prüfen
         if ($type === 'dm' && $targetId !== null) {
             $recipientExists = $this->userModel->find($targetId) !== null;
             if (!$recipientExists) {
@@ -105,8 +122,9 @@ class ChatController extends Controller
             'created_at'   => date('Y-m-d H:i:s')
         ];
 
+        // Foreign Keys je nach Chat-Typ zuweisen
         if ($type === 'global') {
-            // bleibt null
+            // Globaler Chat benötigt keinen foreign key
         } elseif ($type === 'dm') {
             $data['recipient_id'] = $targetId;
         } elseif ($type === 'group') {

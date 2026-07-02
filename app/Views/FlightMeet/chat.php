@@ -42,16 +42,33 @@
                 <?php endif; ?>
 
                 <!-- Treffen-Chats -->
-                <div class="fm-chat-section-title">Flugtreffen</div>
-                <?php if (empty($meetups)): ?>
-                    <p class="fm-empty" style="padding-left: 8px;">Keine Treffen-Chats aktiv.</p>
+                <div class="fm-chat-section-title">Flugtreffen (Aktiv)</div>
+                <?php if (empty($active_meetups)): ?>
+                    <p class="fm-empty" style="padding-left: 8px;">Keine aktiven Chats.</p>
                 <?php else: ?>
-                    <?php foreach ($meetups as $m): ?>
+                    <?php foreach ($active_meetups as $m): ?>
                         <div class="fm-chat-item" data-chat-type="meetup" data-target-id="<?= $m['id'] ?>">
                             <i class="ph ph-airplane"></i>
                             <span><?= esc($m['title']) ?></span>
                         </div>
                     <?php endforeach; ?>
+                <?php endif; ?>
+
+                <!-- Flugtreffen-Chats (Archivierte vergangene Treffen) -->
+                <?php if (!empty($past_meetups)): ?>
+                    <details style="margin-top: 10px;">
+                        <summary style="cursor: pointer; font-size: 0.75rem; text-transform: uppercase; color: var(--color-text-muted-light); font-weight: 700; margin: 14px 8px 6px; letter-spacing: 0.05em; list-style: none; display: flex; align-items: center; gap: 4px;">
+                            <i class="ph ph-folder-open" style="font-size: 0.9rem;"></i> Archivierte Flugtreffen (<?= count($past_meetups) ?>)
+                        </summary>
+                        <div style="padding-left: 4px;">
+                            <?php foreach ($past_meetups as $m): ?>
+                                <div class="fm-chat-item" data-chat-type="meetup" data-target-id="<?= $m['id'] ?>" style="opacity: 0.7;">
+                                    <i class="ph ph-archive"></i>
+                                    <span><?= esc($m['title']) ?></span>
+                                </div>
+                            <?php endforeach; ?>
+                        </div>
+                    </details>
                 <?php endif; ?>
             </div>
         </div>

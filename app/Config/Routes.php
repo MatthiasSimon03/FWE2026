@@ -16,7 +16,7 @@ $routes->group('flightmeet', ['filter' => 'fm_auth', 'namespace' => 'App\Control
     $routes->get('meetups', 'MeetupController::index');
 
     $routes->get('chat', 'ChatController::index');
-    $routes->get('profile', 'ProfileController::index');
+    $routes->match(['get', 'post'], 'profile', 'ProfileController::index');
 
     $routes->get('meetups/(:num)', 'MeetupController::detail/$1');
     $routes->post('meetups/join/(:num)', 'MeetupController::join/$1');

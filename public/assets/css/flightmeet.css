@@ -104,6 +104,10 @@ main {
   color: var(--color-text-lead);
 }
 
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
 /* ==========================================================================
    3. BUTTONS & AKTIONEN
    ========================================================================== */
@@ -126,7 +130,6 @@ main {
   font-family: inherit;
   font-size: 0.95rem;
   font-weight: 600;
-  box-sizing: border-box;
   text-align: center;
 }
 
@@ -176,12 +179,12 @@ main {
 }
 
 .btn-danger-full:hover {
-  background-color: #991b1b;
+  background-color: var(--color-level-profi);
 }
 
 .btn-new-meet{
   background-color: var(--color-primary);
-  color: #ffffff; /* Weißer Text für optimalen Kontrast */
+  color: var(--color-bg-white); /* Weißer Text für optimalen Kontrast */
   border: 1px solid transparent;
 
   /* Flexbox für perfekte Ausrichtung von Icon und Text */
@@ -195,8 +198,8 @@ main {
 }
 
 .btn-new-meet:hover {
-  filter: brightness(0.9); /* Dunkelt das Grün beim Drüberfahren leicht ab */
-  color: #ffffff;
+  filter: brightness(0.9); /* Dunkelt das Blau beim Drüberfahren leicht ab */
+  color: var(--color-bg-white);
 }
 
 .btn-new-meet:active {
@@ -928,42 +931,6 @@ main {
   gap: 10px;
   margin-top: 20px;
 }
-
-/* ==========================================================================
-   11. BÜNDELUNG DER MEDIA QUERIES
-   ========================================================================== */
-
-/* Ab 576px (Tablets) */
-@media (min-width: 576px) {
-  #map {
-    height: 350px;
-  }
-}
-
-/* Ab 992px (Desktop-Bildschirme) */
-@media (min-width: 992px) {
-  #map {
-    height: 450px;
-  }
-
-  .fm-detail-layout {
-    grid-template-columns: 1.7fr 1.3fr;
-    align-items: start;
-  }
-}
-
-
-@media (max-width: 768px) {
-  .fm-nav { flex-direction: column; align-items: stretch; }
-  .fm-brand { justify-content: space-between; }
-  .fm-toggle { display: inline-flex; }
-  .fm-menu { display: none; flex-direction: column; gap: 8px; }
-  .fm-menu.is-open { display: flex; }
-  #fmTableView { display: none; }
-  .fm-view-toggle [data-view="table"] { display: none; }
-  .fm-view-toggle { display: none; }
-}
-
 /* ==========================================================================
    12. FORMULARE FÜR ERSTELLEN & BEARBEITEN
    ========================================================================== */
@@ -1007,21 +974,12 @@ main {
 
 select.fm-field__input {
   width: 100%;
-  box-sizing: border-box;
   background-color: var(--color-bg-white);
 }
 
 textarea.fm-field__input {
   font-family: inherit;
   resize: vertical;
-}
-
-@media (min-width: 576px) {
-  .fm-form-grid--two-cols {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 16px;
-  }
 }
 
 #map-picker {
@@ -1254,7 +1212,7 @@ textarea.fm-field__input {
 
 .fm-msg-bubble-wrapper.is-me .fm-msg-bubble {
   background: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-bg-white);
   border-bottom-right-radius: 2px;
 }
 
@@ -1293,7 +1251,7 @@ textarea.fm-field__input {
 
 .fm-chat-send-btn {
   background: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-bg-white);
   border: none;
   border-radius: 8px;
   width: 46px;
@@ -1318,92 +1276,6 @@ textarea.fm-field__input {
   color: var(--color-text-muted);
 }
 
-
-/* ==========================================================================
-   15. RESPONSIVES CHAT-LAYOUT (VOLLE BREITE AUF MOBILGERÄTEN)
-   ========================================================================== */
-@media (max-width: 768px) {
-
-  /*
-     Sorgt dafür, dass der umschließende Container NUR auf der Chat-Seite
-     die Abstände verliert und die volle Displaybreite nutzt.
-  */
-  main:has(.fm-chat-container),
-  .container:has(.fm-chat-container) {
-    max-width: 100% !important;
-    width: 100% !important;
-    padding: 0 !important;
-    margin: 0 !important;
-  }
-
-  /* Der Chat füllt nun die komplette Breite und Höhe des Displays aus */
-  .fm-chat-container {
-    margin: 0 !important;
-    border: none; /* Entfernt den Rahmen auf Handys */
-    border-radius: 0; /* Entfernt die abgerundeten Ecken auf Handys */
-    height: calc(100vh - 60px); /* Nutzt den maximal verfügbaren vertikalen Platz */
-    width: 100% !important;
-  }
-
-  /* Standardzustand auf Mobilgeräten: Nur Sidebar zeigen */
-  .fm-chat-sidebar {
-    width: 100%;
-    border-right: none;
-  }
-
-  .fm-chat-window {
-    display: none;
-  }
-
-  /* Wenn ein Chat aktiv geöffnet ist */
-  .fm-chat-container.show-chat-window .fm-chat-sidebar {
-    display: none;
-  }
-
-  .fm-chat-container.show-chat-window .fm-chat-window {
-    display: flex;
-    width: 100%;
-  }
-
-  /* Zurück-Button auf Handys einblenden */
-  .fm-chat-back-btn {
-    display: inline-flex !important;
-    align-items: center;
-    justify-content: center;
-    background: none;
-    border: none;
-    cursor: pointer;
-    color: var(--color-primary);
-    padding: 4px 8px 4px 0;
-  }
-}
-
-/* Auf großen Bildschirmen den Zurück-Button immer verstecken */
-@media (min-width: 769px) {
-  .fm-chat-back-btn {
-    display: none !important;
-  }
-}
-
-@media (min-width: 992px) {
-  /*
-     Erhöht die maximale Breite des Containers von 960px auf 1200px,
-     aber ausschließlich auf der Chat-Seite.
-  */
-  .container:has(.fm-chat-container) {
-    max-width: 1200px !important;
-    width: 100% !important;
-  }
-
-  /*
-     Stellt sicher, dass das Chatfenster immer die vollen 1200px ausfüllt
-     und sich bei kurzen Nachrichten nicht zusammenzieht.
-  */
-  .fm-chat-container {
-    width: 100% !important;
-  }
-}
-
 /* ==========================================================================
    16. DASHBOARD REGIONEN-CHART
    ========================================================================== */
@@ -1425,83 +1297,6 @@ textarea.fm-field__input {
 }
 
 
-/* 1. Container auf Detailseiten (Treffen & Gruppen) auf Desktop-Bildschirmen verbreitern */
-@media (min-width: 992px) {
-  .container:has(.fm-detail-layout) {
-    max-width: 1200px !important;
-    width: 100% !important;
-  }
-}
-
-/* 2. Spaltenverhältnis anpassen: Mehr Platz für den Hauptinhalt, kompaktere Sidebar */
-@media (min-width: 992px) {
-  .fm-detail-layout {
-    /* 2fr 1fr bedeutet: 2/3 Breite für den Hauptbereich links, 1/3 Breite für die Sidebar rechts */
-    grid-template-columns: 2fr 1fr !important;
-    align-items: start;
-    gap: 32px;
-  }
-}
-
-
-
-/* Moderne, einheitliche Buttons für die Mitgliederverwaltung */
-.btn-member-action {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  padding: 5px 10px;
-  font-size: 0.75rem;
-  font-weight: 600;
-  border-radius: 6px;
-  text-decoration: none;
-  cursor: pointer;
-  transition: all 0.15s ease-in-out;
-  font-family: inherit;
-  border: 1px solid transparent;
-}
-
-.btn-member-action:active {
-  transform: scale(0.96); /* Minimaler Klick-Effekt */
-}
-
-/* Befördern (Blau-Nuancen) */
-.btn-member-action--promote {
-  background-color: var(--color-primary-light);
-  color: var(--color-primary);
-  border: 1px solid var(--color-border-card);
-}
-.btn-member-action--promote:hover {
-  background-color: var(--color-primary);
-  color: #ffffff;
-  border-color: var(--color-primary);
-}
-
-/* Besitz übertragen (Orange-Nuancen) */
-.btn-member-action--transfer {
-  background-color: var(--color-status-ausgebucht-bg);
-  color: var(--color-status-ausgebucht);
-  border: 1px solid var(--color-level-fortgeschritten-border);
-}
-.btn-member-action--transfer:hover {
-  background-color: var(--color-status-ausgebucht);
-  color: #ffffff;
-  border-color: var(--color-status-ausgebucht);
-}
-
-/* Kicken / Löschen (Rot-Nuancen) */
-.btn-member-action--kick {
-  background-color: var(--color-status-abgesagt-bg);
-  color: var(--color-status-abgesagt);
-  border: 1px solid var(--color-level-profi-border);
-}
-.btn-member-action--kick:hover {
-  background-color: var(--color-status-abgesagt);
-  color: #ffffff;
-  border-color: var(--color-status-abgesagt);
-}
-
-
 /* ==========================================================================
    17. GENERISCHER KALENDER & MITGLIEDER-AKTIONEN (Wiederverwendbar)
    ========================================================================== */
@@ -1511,7 +1306,6 @@ textarea.fm-field__input {
   border-radius: 12px;
   padding: 20px;
   width: 100%;
-  box-sizing: border-box;
 }
 .fm-calendar-header {
   display: flex;
@@ -1563,7 +1357,6 @@ textarea.fm-field__input {
   position: relative;
   min-width: 0;
   overflow: hidden;
-  box-sizing: border-box;
 }
 .fm-calendar-day.other-month {
   opacity: 0.35;
@@ -1602,20 +1395,19 @@ textarea.fm-field__input {
   display: block;
   font-weight: 500;
   width: 100%;
-  box-sizing: border-box;
   border: 1px solid transparent;
   transition: all 0.15s ease-in-out;
 }
 .fm-calendar-event--geplant {
   background-color: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-bg-white);
 }
 .fm-calendar-event--geplant:hover {
   background-color: var(--color-primary-hover);
 }
 .fm-calendar-event--ausgebucht {
   background-color: var(--color-status-ausgebucht);
-  color: #ffffff;
+  color: var(--color-bg-white);
 }
 .fm-calendar-event--ausgebucht:hover {
   background-color: #92400e;
@@ -1664,7 +1456,7 @@ textarea.fm-field__input {
 }
 .btn-member-action--promote:hover {
   background-color: var(--color-primary);
-  color: #ffffff;
+  color: var(--color-bg-white);
   border-color: var(--color-primary);
 }
 .btn-member-action--transfer {
@@ -1674,7 +1466,7 @@ textarea.fm-field__input {
 }
 .btn-member-action--transfer:hover {
   background-color: var(--color-status-ausgebucht);
-  color: #ffffff;
+  color: var(--color-bg-white);
   border-color: var(--color-status-ausgebucht);
 }
 .btn-member-action--kick {
@@ -1684,6 +1476,144 @@ textarea.fm-field__input {
 }
 .btn-member-action--kick:hover {
   background-color: var(--color-status-abgesagt);
-  color: #ffffff;
+  color: var(--color-bg-white);
   border-color: var(--color-status-abgesagt);
+}
+
+/* ==========================================================================
+   RESPONSIVE DESIGN (BÜNDELUNG ALLER MEDIA QUERIES)
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   1. MOBILGERÄTE (Bis maximal 768px)
+   -------------------------------------------------------------------------- */
+@media (max-width: 768px) {
+  /* Navigation & Menü */
+  .fm-nav {
+    flex-direction: column;
+    align-items: stretch;
+  }
+  .fm-brand {
+    justify-content: space-between;
+  }
+  .fm-toggle {
+    display: inline-flex;
+  }
+  .fm-menu {
+    display: none;
+    flex-direction: column;
+    gap: 8px;
+  }
+  .fm-menu.is-open {
+    display: flex;
+  }
+
+  /* Ansichten-Umschalter & Tabellen ausblenden */
+  #fmTableView,
+  .fm-view-toggle,
+  .fm-view-toggle [data-view="table"] {
+    display: none;
+  }
+
+  /* Chat-System Layout (Volle Breite) */
+  main:has(.fm-chat-container),
+  .container:has(.fm-chat-container) {
+    max-width: 100% !important;
+    width: 100% !important;
+    padding: 0 !important;
+    margin: 0 !important;
+  }
+
+  .fm-chat-container {
+    margin: 0 !important;
+    border: none;
+    border-radius: 0;
+    height: calc(100vh - 60px);
+    width: 100% !important;
+  }
+
+  .fm-chat-sidebar {
+    width: 100%;
+    border-right: none;
+  }
+
+  .fm-chat-window {
+    display: none;
+  }
+
+  .fm-chat-container.show-chat-window .fm-chat-sidebar {
+    display: none;
+  }
+
+  .fm-chat-container.show-chat-window .fm-chat-window {
+    display: flex;
+    width: 100%;
+  }
+
+  .fm-chat-back-btn {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    background: none;
+    border: none;
+    cursor: pointer;
+    color: var(--color-primary);
+    padding: 4px 8px 4px 0;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   2. TABLETS & GROSSE BILDSCHIRME (Ab 576px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 576px) {
+  /* Karte */
+  #map {
+    height: 350px;
+  }
+
+  /* Formularspalten */
+  .fm-form-grid--two-cols {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   3. MITTLERE BILDSCHIRME (Ab 769px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 769px) {
+  /* Zurück-Button im Chat verstecken */
+  .fm-chat-back-btn {
+    display: none !important;
+  }
+}
+
+/* --------------------------------------------------------------------------
+   4. DESKTOP-ANSICHTEN (Ab 992px)
+   -------------------------------------------------------------------------- */
+@media (min-width: 992px) {
+  /* Interaktive Karte */
+  #map {
+    height: 450px;
+  }
+
+  /* Detail-Layout (Spaltenverhältnis 2/3 zu 1/3) */
+  .fm-detail-layout {
+    grid-template-columns: 2fr 1fr;
+    align-items: start;
+    gap: 32px;
+  }
+
+  /* Container-Verbreiterung für Detailseiten & Chat */
+  .container:has(.fm-detail-layout),
+  .container:has(.fm-chat-container) {
+    max-width: 1200px !important;
+    width: 100% !important;
+  }
+
+  /* Chat-Fenster Breite */
+  .fm-chat-container {
+    width: 100% !important;
+  }
 }

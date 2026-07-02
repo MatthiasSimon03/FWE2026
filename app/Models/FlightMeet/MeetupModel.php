@@ -125,10 +125,10 @@ class MeetupModel extends Model
     public function getUserMeetups(int $userId): array
     {
         return $this->db->table($this->table . ' fm')
-            ->select('fm.id, fm.title')
+            ->select('fm.id, fm.title, fm.status') // Spalte "status" hinzugefügt!
             ->join('fm_flight_meet_participants p', 'p.flight_meet_id = fm.id')
             ->where('p.user_id', $userId)
-            ->orderBy('fm.title', 'ASC')
+            ->orderBy('fm.meet_date', 'DESC')
             ->get()
             ->getResultArray();
     }
@@ -211,13 +211,27 @@ class MeetupModel extends Model
             return false;
         }
 
-        // 3. Teilnehmer eintragen
+        // 3. Aktuelle Teilnehmerzahl ermitteln
+        $currentCount = $db->table('fm_flight_meet_participants')
+            ->where('flight_meet_id', $meetupId)
+            ->countAllResults();
+
+        $maxParticipants = (int)($meetup['max_participants'] ?? 0);
+
+        // 4. Prüfen, ob das Treffen bereits voll ist (sofern ein Limit > 0 gesetzt ist)
+        if ($maxParticipants > 0 && $currentCount >= $maxParticipants) {
+            // Falls der Status fälschlicherweise noch auf 'geplant' stand, jetzt korrigieren
+            $this->update($meetupId, ['status' => 'ausgebucht']);
+            return false;
+        }
+
+        // 5. Teilnehmer eintragen
         $db->table('fm_flight_meet_participants')->insert([
             'flight_meet_id' => $meetupId,
             'user_id'        => $userId,
         ]);
 
-        // 4. Wenn das Treffen nun voll ist, Status auf 'ausgebucht' ändern
+        // 6. Wenn das Treffen nun voll ist, Status auf 'ausgebucht' ändern
         $currentCount = $db->table('fm_flight_meet_participants')
             ->where('flight_meet_id', $meetupId)
             ->countAllResults();

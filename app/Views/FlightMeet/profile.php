@@ -4,6 +4,9 @@
 <?php if (session()->getFlashdata('success')): ?>
     <div class="alert alert-success"><?= esc(session()->getFlashdata('success')) ?></div>
 <?php endif; ?>
+<?php if (session()->getFlashdata('error')): ?>
+    <div class="alert alert-error"><?= esc(session()->getFlashdata('error')) ?></div>
+<?php endif; ?>
 
     <div class="fm-detail-layout">
         <!-- Linker Bereich: Aktivitäten-Tabs -->
@@ -104,27 +107,78 @@
         <!-- Rechte Sidebar: Benutzer-Profil & Gruppen -->
         <div class="fm-detail-sidebar">
             <div class="fm-detail-card">
-                <h3 class="fm-detail-card-title">Mein Profil</h3>
 
-                <dl class="fm-detail-info-list">
-                    <div class="fm-detail-info-item">
-                        <dt>Pilot</dt>
-                        <dd><strong><?= esc($user['username']) ?></strong></dd>
-                    </div>
-                    <div class="fm-detail-info-item">
-                        <dt>E-Mail</dt>
-                        <dd><?= esc($user['email']) ?></dd>
-                    </div>
-                    <div class="fm-detail-info-item">
-                        <dt>Erfahrung</dt>
-                        <dd>
-                            <?php $levelClass = strtolower(esc($user['experience_level'])); ?>
-                            <span class="fm-badge-level fm-badge-level--<?= $levelClass ?>">
-                            <?= esc($user['experience_level']) ?>
-                        </span>
-                        </dd>
-                    </div>
-                </dl>
+                <!-- Überschrift mit dezentem Edit-Pencil -->
+                <h3 class="fm-detail-card-title" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 0; margin-bottom: 20px;">
+                    <span>Mein Profil</span>
+                    <button id="toggle-edit-profile" class="btn-action-edit" title="Profil bearbeiten" style="background: none; border: none; cursor: pointer; padding: 0;">
+                        <i class="ph ph-pencil" style="font-size: 1.2rem;"></i>
+                    </button>
+                </h3>
+
+                <!-- A: STANDARD-ANZEIGE-MODUS -->
+                <div id="profile-display-view">
+                    <dl class="fm-detail-info-list">
+                        <div class="fm-detail-info-item">
+                            <dt>Pilot</dt>
+                            <dd><strong><?= esc($user['username']) ?></strong></dd>
+                        </div>
+                        <div class="fm-detail-info-item">
+                            <dt>E-Mail</dt>
+                            <dd><?= esc($user['email']) ?></dd>
+                        </div>
+                        <div class="fm-detail-info-item">
+                            <dt>Erfahrung</dt>
+                            <dd>
+                                <?php $levelClass = strtolower(esc($user['experience_level'])); ?>
+                                <span class="fm-badge-level fm-badge-level--<?= $levelClass ?>">
+                                    <?= esc($user['experience_level']) ?>
+                                </span>
+                            </dd>
+                        </div>
+
+                        <!-- NEU: Pilot-Statistiken -->
+                        <div class="fm-detail-info-item" style="border-top: 1px dashed var(--color-border-medium); padding-top: 12px; margin-top: 12px;">
+                            <dt>Absolvierte Flüge</dt>
+                            <dd><span class="fm-status fm-status--aktiv" style="font-weight: 700; font-size: 0.85rem; padding: 2px 10px;"><?= esc($stats['completed']) ?></span></dd>
+                        </div>
+                        <div class="fm-detail-info-item">
+                            <dt>Organisierte Treffen</dt>
+                            <dd><span class="fm-status fm-status--geplant" style="font-weight: 700; font-size: 0.85rem; padding: 2px 10px;"><?= esc($stats['created']) ?></span></dd>
+                        </div>
+                    </dl>
+                </div>
+
+                <!-- B: INLINE BEARBEITEN-MODUS (Umschaltbar per JS) -->
+                <div id="profile-edit-view" style="display: none;">
+                    <form method="post" action="<?= base_url('flightmeet/profile') ?>" class="fm-form-grid" style="gap: 12px;">
+                        <?= csrf_field() ?>
+
+                        <label class="fm-field">
+                            <span class="fm-field__label" style="font-size: 0.75rem;">Benutzername</span>
+                            <input class="fm-field__input" type="text" name="username" value="<?= esc($user['username']) ?>" required style="padding: 6px 10px; font-size: 0.9rem;">
+                        </label>
+
+                        <label class="fm-field">
+                            <span class="fm-field__label" style="font-size: 0.75rem;">Erfahrungslevel</span>
+                            <select class="fm-field__input" name="experience_level" required style="padding: 6px 10px; font-size: 0.9rem; background-color: white;">
+                                <option value="Einsteiger" <?= $user['experience_level'] === 'Einsteiger' ? 'selected' : '' ?>>Einsteiger</option>
+                                <option value="Fortgeschritten" <?= $user['experience_level'] === 'Fortgeschritten' ? 'selected' : '' ?>>Fortgeschritten</option>
+                                <option value="Profi" <?= $user['experience_level'] === 'Profi' ? 'selected' : '' ?>>Profi</option>
+                            </select>
+                        </label>
+
+                        <div style="display: flex; gap: 8px; margin-top: 12px;">
+                            <button type="submit" class="btn" style="padding: 6px 10px; font-size: 0.85rem; flex: 1; border: none; cursor: pointer;">Speichern</button>
+                            <button type="button" id="cancel-edit-profile" class="btn btn-secondary" style="padding: 6px 10px; font-size: 0.85rem; flex: 1; border: none; cursor: pointer;">Abbrechen</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div class="card" style="margin-top: 20px; background: var(--color-bg-white); border-color: var(--color-border-card); padding: 16px;">
+                    <h4 class="fm-sidebar-subtitle" style="margin: 0 0 12px 0;">Saison-Aktivität (<?= date('Y') ?>)</h4>
+                    <canvas id="profileActiveChart" data-stats='<?= json_encode($months_data) ?>' style="max-height: 150px; width: 100%;"></canvas>
+                </div>
 
                 <hr class="fm-divider">
 
@@ -150,6 +204,7 @@
         </div>
     </div>
 
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
         // 1. FLUG-LISTE-TABS (Geplant vs. Historisch)
         function switchFlightTab(tab) {
@@ -185,9 +240,71 @@
                     const calendarFlights = <?= json_encode(array_merge($scheduled_flights, $historic_flights)) ?>;
                     pCalendar = new DynamicFlightCalendar('p-cal', calendarFlights, '<?= base_url() ?>');
                     pCalendar.render();
+                    initProfileChart();
                 }
             }, 30); // Alle 30ms prüfen
-        });
+
+            // Inline-Formular Umschalt-Logik per Klick auf das Stift-Icon
+            const toggleBtn = document.getElementById('toggle-edit-profile');
+            const cancelBtn = document.getElementById('cancel-edit-profile');
+            const displayView = document.getElementById('profile-display-view');
+            const editView = document.getElementById('profile-edit-view');
+
+            toggleBtn?.addEventListener('click', () => {
+                const isEditing = editView.style.display === 'block';
+                displayView.style.display = isEditing ? 'block' : 'none';
+                editView.style.display = isEditing ? 'none' : 'block';
+
+                const icon = toggleBtn.querySelector('i');
+                if (icon) {
+                    icon.className = isEditing ? 'ph ph-pencil' : 'ph ph-user-circle';
+                }
+            });
+
+            cancelBtn?.addEventListener('click', () => {
+                displayView.style.display = 'block';
+                editView.style.display = 'none';
+                const icon = toggleBtn?.querySelector('i');
+                if (icon) icon.className = 'ph ph-pencil';
+            });
+        });function initProfileChart() {
+            const chartEl = document.getElementById('profileActiveChart');
+            if (chartEl && typeof Chart !== 'undefined') {
+                const rawData = JSON.parse(chartEl.dataset.stats || '[]');
+                const ctx = chartEl.getContext('2d');
+                new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels: ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun', 'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
+                        datasets: [{
+                            data: rawData,
+                            backgroundColor: 'rgba(30, 136, 229, 0.15)',
+                            borderColor: 'rgba(30, 136, 229, 1)',
+                            borderWidth: 1.5,
+                            borderRadius: 4
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: { stepSize: 1, color: '#64748b', font: { size: 9 } },
+                                grid: { display: false }
+                            },
+                            x: {
+                                ticks: { color: '#64748b', font: { size: 9 } },
+                                grid: { display: false }
+                            }
+                        },
+                        plugins: {
+                            legend: { display: false }
+                        }
+                    }
+                });
+            }
+        }
     </script>
 
 <?= $this->endSection() ?>

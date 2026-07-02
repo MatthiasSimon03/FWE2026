@@ -8,6 +8,7 @@ use App\Models\FlightMeet\GroupJoinRequestModel;
 
 class GroupController extends BaseController
 {
+    // DB-Modelle für Gruppenstrukturen und Berechtigungen
     protected $groupModel;
     protected $memberModel;
     protected $requestModel;
@@ -19,13 +20,16 @@ class GroupController extends BaseController
         $this->requestModel = new GroupJoinRequestModel();
     }
 
+    /**
+     * Listenansicht aller verfügbaren Gruppen
+     */
     public function index()
     {
         $search = $this->request->getGet('q') ?? '';
         $groups = $this->groupModel->getGroups($search);
         $userId = session()->get('fm_user_id');
 
-        // Für jede Gruppe prüfen, ob der User Mitglied ist
+        // Für jede Gruppe Beziehungsdaten des aktuellen Nutzers holen
         foreach ($groups as &$group) {
             $group['is_member'] = $this->memberModel->isMember($group['id'], $userId);
             $group['user_role'] = $this->memberModel->getUserRole($group['id'], $userId);
@@ -40,6 +44,9 @@ class GroupController extends BaseController
         ]);
     }
 
+    /**
+     * Detailseite einer Gruppe mit Rollen- und Sichtbarkeitsprüfung
+     */
     public function detail(int $id)
     {
         $group = $this->groupModel->getGroupById($id);
@@ -51,7 +58,7 @@ class GroupController extends BaseController
         $isMember = $this->memberModel->isMember($id, $userId);
         $userRole = $this->memberModel->getUserRole($id, $userId);
 
-        // Sicherheitsprüfung für private Gruppen
+        // Sichtbarkeitsschutz: Nicht-Mitglieder sehen bei privaten Gruppen nur eine reduzierte "Sperrseite"
         if ($group['visibility'] === 'private' && !$isMember) {
             $hasPending = $this->requestModel->hasPendingRequest($id, $userId);
             return view('FlightMeet/groups/detail_private', [
@@ -62,14 +69,14 @@ class GroupController extends BaseController
             ]);
         }
 
-        // Flüge holen (geplant vs. historisch)
+        // Flüge chronologisch getrennt laden (bevorstehend vs. historisch)
         $scheduledFlights = $this->groupModel->getGroupMeetups($id, ['geplant', 'ausgebucht']);
         $historicFlights  = $this->groupModel->getGroupMeetups($id, ['abgeschlossen', 'abgesagt']);
 
-        // Mitgliederliste
+        // Vollständige Liste der Mitglieder für die Gruppenübersicht
         $members = $this->memberModel->getMembersWithDetails($id);
 
-        // Beitrittsanfragen holen (nur für Admins & Owners)
+        // Beitrittsanfragen abrufen (Sicherheitsbarriere: Nur Admins und Eigentümer dürfen diese einsehen)
         $pendingRequests = [];
         if (in_array($userRole, ['owner', 'admin'], true)) {
             $pendingRequests = $this->requestModel->getPendingRequests($id);
@@ -88,6 +95,9 @@ class GroupController extends BaseController
         ]);
     }
 
+    /**
+     * Erstellung einer neuen Gruppe
+     */
     public function create()
     {
         if ($this->request->is('post')) {
@@ -103,16 +113,16 @@ class GroupController extends BaseController
                 'created_by'    => session()->get('fm_user_id')
             ];
 
-            // Validierung: Name muss eindeutig sein
+            // Validierung: Eindeutigkeit des Gruppennamens vorab erzwingen
             if ($this->groupModel->where('name', $data['name'])->countAllResults() > 0) {
                 return redirect()->back()->withInput()->with('error', 'Eine Gruppe mit diesem Namen existiert bereits.');
             }
 
+            // Atomare Transaktion: Gruppe erstellen und Gründer direkt als Inhaber eintragen
             $this->groupModel->db->transStart();
 
             $groupId = $this->groupModel->insert($data);
             if ($groupId) {
-                // Ersteller wird automatisch Owner
                 $this->memberModel->addMember($groupId, $data['created_by'], 'owner');
             }
 
@@ -131,6 +141,9 @@ class GroupController extends BaseController
         ]);
     }
 
+    /**
+     * Bearbeitung bestehender Gruppendaten (Besitzer-exklusiv)
+     */
     public function edit(int $id)
     {
         $group = $this->groupModel->find($id);
@@ -169,6 +182,9 @@ class GroupController extends BaseController
         ]);
     }
 
+    /**
+     * Vollständiges Löschen einer Gruppe (Besitzer-exklusiv)
+     */
     public function delete(int $id)
     {
         $group = $this->groupModel->find($id);
@@ -186,10 +202,13 @@ class GroupController extends BaseController
         return redirect()->to('flightmeet/groups/detail/' . $id)->with('error', 'Fehler beim Löschen.');
     }
 
+    /**
+     * Direktes Beitreten (Sicherheitsprüfung: Nur bei Sichtbarkeitstyp "open" gestattet)
+     */
     public function join(int $id)
     {
         $group = $this->groupModel->find($id);
-        if (!$group || $group['visibility'] !== 'open') {   // separate Methode für private Gruppen (request join)
+        if (!$group || $group['visibility'] !== 'open') {
             return redirect()->to('flightmeet/groups')->with('error', 'Aktion nicht erlaubt.');
         }
 
@@ -200,11 +219,15 @@ class GroupController extends BaseController
         return redirect()->to('flightmeet/groups/detail/' . $id)->with('error', 'Beitritt fehlgeschlagen.');
     }
 
+    /**
+     * Austreten aus einer Gruppe
+     */
     public function leave(int $id)
     {
         $userId = session()->get('fm_user_id');
         $role = $this->memberModel->getUserRole($id, $userId);
 
+        // Systemschutz: Der Eigentümer darf die Gruppe nicht ohne vorherigen Transfer verlassen
         if ($role === 'owner') {
             return redirect()->to('flightmeet/groups/detail/' . $id)->with('error', 'Besitzer können die Gruppe nicht verlassen. Übertrage zuerst den Besitz.');
         }
@@ -215,10 +238,13 @@ class GroupController extends BaseController
         return redirect()->to('flightmeet/groups/detail/' . $id)->with('error', 'Aktion fehlgeschlagen.');
     }
 
+    /**
+     * Beitrittsanfrage einreichen (Nur für "private" Gruppen)
+     */
     public function requestJoin(int $id)
     {
         $group = $this->groupModel->find($id);
-        if (!$group || $group['visibility'] !== 'private') {    // Für offene Gruppen gibt es keine Beitrittsanfrage
+        if (!$group || $group['visibility'] !== 'private') {
             return redirect()->to('flightmeet/groups')->with('error', 'Ungültige Gruppe.');
         }
 
@@ -232,17 +258,17 @@ class GroupController extends BaseController
             return redirect()->back()->with('error', 'Du hast bereits eine ausstehende Anfrage für diese Gruppe.');
         }
 
-        // Falls bereits eine abgelehnte oder stornierte Zeile existiert -> UPDATE, sonst INSERT
+        // Falls eine alte, ehemals abgelehnte Anfrage existiert -> Datensatz reaktivieren, sonst neu anlegen
         $existing = $this->requestModel->where('group_id', $id)->where('user_id', $userId)->first();
         $message = $this->request->getPost('message') ?? '';
 
-        if ($existing) {    // User hatte für diese Gruppe bereits eine Anfrage gesendet (diese wurde abgelehnt)
+        if ($existing) {
             $this->requestModel->update($existing['id'], [
                 'status'       => 'pending',
                 'message'      => $message,
                 'requested_at' => date('Y-m-d H:i:s')
             ]);
-        } else {        // User hat für diese Gruppe noch nie eine Anfrage gestellt
+        } else {
             $this->requestModel->insert([
                 'group_id' => $id,
                 'user_id'  => $userId,
@@ -254,6 +280,9 @@ class GroupController extends BaseController
         return redirect()->to('flightmeet/groups')->with('success', 'Beitrittsanfrage wurde gesendet.');
     }
 
+    /**
+     * Beitrittsanfrage bewilligen (Nur für Admins & Inhaber)
+     */
     public function approveRequest(int $requestId)
     {
         $request = $this->requestModel->find($requestId);
@@ -268,16 +297,15 @@ class GroupController extends BaseController
             return redirect()->back()->with('error', 'Keine Berechtigung.');
         }
 
+        // Transaktionsschutz: Statusupdate und Mitgliedsdatensatz müssen gemeinsam gelingen
         $this->requestModel->db->transStart();
 
-        // 1. Anfrage auf accepted setzen
         $this->requestModel->update($requestId, [
             'status'     => 'accepted',
             'handled_by' => $userId,
             'handled_at' => date('Y-m-d H:i:s')
         ]);
 
-        // 2. Nutzer als Mitglied eintragen
         $this->memberModel->addMember($request['group_id'], $request['user_id'], 'member');
 
         $this->requestModel->db->transComplete();
@@ -289,6 +317,9 @@ class GroupController extends BaseController
         return redirect()->back()->with('success', 'Beitrittsanfrage wurde angenommen.');
     }
 
+    /**
+     * Beitrittsanfrage abweisen (Nur für Admins & Inhaber)
+     */
     public function rejectRequest(int $requestId)
     {
         $request = $this->requestModel->find($requestId);
@@ -312,6 +343,9 @@ class GroupController extends BaseController
         return redirect()->back()->with('success', 'Beitrittsanfrage wurde abgelehnt.');
     }
 
+    /**
+     * Mitglied die Admin-Rolle zuweisen
+     */
     public function promoteToAdmin(int $groupId, int $userId)
     {
         $currentUserId = session()->get('fm_user_id');
@@ -321,7 +355,7 @@ class GroupController extends BaseController
             return redirect()->back()->with('error', 'Keine Berechtigung.');
         }
 
-        // Admins dürfen nur "members" zu "admins" befördern (nicht Rollen anderer Admins verändern)
+        // Hierarchie-Schutz: Admins dürfen keine anderen Admins befördern (bzw. deren Rechte ändern)
         $targetRole = $this->memberModel->getUserRole($groupId, $userId);
         if ($currentUserRole === 'admin' && $targetRole !== 'member') {
             return redirect()->back()->with('error', 'Du kannst nur normale Mitglieder befördern.');
@@ -333,6 +367,9 @@ class GroupController extends BaseController
         return redirect()->back()->with('error', 'Aktion fehlgeschlagen.');
     }
 
+    /**
+     * Admin-Rolle wieder entziehen (Besitzer-exklusiv)
+     */
     public function demoteFromAdmin(int $groupId, int $userId)
     {
         $currentUserId = session()->get('fm_user_id');
@@ -348,6 +385,9 @@ class GroupController extends BaseController
         return redirect()->back()->with('error', 'Aktion fehlgeschlagen.');
     }
 
+    /**
+     * Gruppeneigentum auf ein anderes Mitglied übertragen (Inhaber-Wechsel)
+     */
     public function transferOwner(int $groupId, int $userId)
     {
         $currentUserId = session()->get('fm_user_id');
@@ -359,13 +399,13 @@ class GroupController extends BaseController
 
         $this->groupModel->db->transStart();
 
-        // 1. Alten Owner auf Admin herabstufen
+        // 1. Rollenanpassung des bisherigen Eigentümers zu Admin
         $this->memberModel->where('group_id', $groupId)->where('user_id', $currentUserId)->set(['role' => 'admin'])->update();
 
-        // 2. Neuen Owner setzen
+        // 2. Rollenzuweisung des neuen Eigentümers zu Owner
         $this->memberModel->where('group_id', $groupId)->where('user_id', $userId)->set(['role' => 'owner'])->update();
 
-        // 3. Spalte 'created_by' in fm_groups updaten
+        // 3. System-Eintrag in der Haupttabelle aktualisieren
         $this->groupModel->update($groupId, ['created_by' => $userId]);
 
         $this->groupModel->db->transComplete();
@@ -377,6 +417,9 @@ class GroupController extends BaseController
         return redirect()->to('flightmeet/groups/detail/' . $groupId)->with('success', 'Inhaberschaft erfolgreich übertragen. Du bist jetzt Admin.');
     }
 
+    /**
+     * Mitglied aus der Gruppe entfernen (Sicherheitsvalidiert gegen unzulässige Kicks)
+     */
     public function removeMember(int $groupId, int $userId)
     {
         $currentUserId = session()->get('fm_user_id');
@@ -388,7 +431,7 @@ class GroupController extends BaseController
 
         $targetUserRole = $this->memberModel->getUserRole($groupId, $userId);
 
-        // Sicherheitsprüfungen
+        // Hierarchie-Validierungen vor dem Kicken
         if ($userId === $currentUserId) {
             return redirect()->back()->with('error', 'Nutze "Gruppe verlassen", um dich selbst auszutragen.');
         }

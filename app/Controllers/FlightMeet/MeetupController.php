@@ -7,26 +7,26 @@ use CodeIgniter\HTTP\ResponseInterface;
 
 class MeetupController extends BaseController
 {
+    // DB-Modell für das Erstellen, Verwalten und Filtern von Flugtreffen
     protected MeetupModel $meetupModel;
 
     public function __construct()
     {
-        // Model einmalig im Konstruktor laden, um Redundanz zu vermeiden
         $this->meetupModel = new MeetupModel();
     }
 
+    /**
+     * Übersicht aller Flugtreffen mit Filteroptionen
+     */
     public function index(): ResponseInterface
     {
-        // 1. Alle GET-Parameter abrufen
         $allGetParams = $this->request->getGet();
 
-        // 2. Unterscheiden: Erster Aufruf vs. aktives Abschicken des Formulars
+        // Standardverhalten: Beim ersten Laden der Seite werden nur geplante Treffen angezeigt.
+        // Sobald Filter aktiv gesendet werden, werden auch leere Checkbox-Auswahlen erlaubt.
         if (empty($allGetParams)) {
-            // Keine Parameter vorhanden -> Erster Aufruf / Zurücksetzen -> Standardwert setzen
             $status = ['geplant'];
         } else {
-            // Formular wurde abgeschickt. Wenn keine Checkboxen angehakt sind,
-            // ist der Parameter 'status' null, was wir als leeres Array interpretieren.
             $statusParam = $this->request->getGet('status');
             if ($statusParam === null) {
                 $status = [];
@@ -42,6 +42,7 @@ class MeetupController extends BaseController
             'status' => $status,
         ];
 
+        // Dropdowns dynamisch mit Werten befüllen, die in der DB existieren
         $options = $this->meetupModel->getFilterOptions();
 
         return $this->response->setBody(view('FlightMeet/meetups', [
@@ -53,6 +54,9 @@ class MeetupController extends BaseController
         ]));
     }
 
+    /**
+     * Detailseite eines einzelnen Treffens
+     */
     public function detail(int $id): ResponseInterface
     {
         $currentUserId = session()->get('fm_user_id');
@@ -64,6 +68,7 @@ class MeetupController extends BaseController
                 ->with('error', 'Flugtreffen wurde nicht gefunden.');
         }
 
+        // Kontext-Tracking: Ermöglicht eine "Zurück zur Gruppe"-Navigation, falls von dort aufgerufen
         $fromGroup = $this->request->getGet('from_group');
         $meetup['from_group'] = $fromGroup ? (int)$fromGroup : null;
 
@@ -75,6 +80,9 @@ class MeetupController extends BaseController
         ]));
     }
 
+    /**
+     * Für ein Treffen anmelden (Model prüft Kapazitätsgrenzen)
+     */
     public function join(int $id): ResponseInterface
     {
         $userId = session()->get('fm_user_id');
@@ -86,6 +94,9 @@ class MeetupController extends BaseController
         return redirect()->to('flightmeet/meetups/' . $id)->with('error', 'Anmeldung fehlgeschlagen (Treffen ist bereits voll).');
     }
 
+    /**
+     * Vom Treffen abmelden
+     */
     public function leave(int $id): ResponseInterface
     {
         $userId = session()->get('fm_user_id');
@@ -97,6 +108,9 @@ class MeetupController extends BaseController
         return redirect()->to('flightmeet/meetups/' . $id)->with('error', 'Abmeldung fehlgeschlagen.');
     }
 
+    /**
+     * Neues Flugtreffen erstellen
+     */
     public function create(): ResponseInterface
     {
         if ($this->request->is('post')) {
@@ -114,6 +128,7 @@ class MeetupController extends BaseController
             $latitude = $this->request->getPost('latitude') ?: null;
             $longitude = $this->request->getPost('longitude') ?: null;
 
+            // Pflichtfeld-Validierung
             if (empty($title) || empty($location) || empty($region) || empty($meetDate) || empty($meetTime) || empty($level) || empty($maxParticipants) || empty($latitude) || empty($description)) {
                 return redirect()->back()->withInput()->with('error', 'Bitte füllen Sie alle erforderlichen Felder aus.');
             }
@@ -153,6 +168,9 @@ class MeetupController extends BaseController
         ]));
     }
 
+    /**
+     * Flugtreffen bearbeiten (Eigentümer-exklusiv)
+     */
     public function edit(int $id): ResponseInterface
     {
         $currentUserId = session()->get('fm_user_id');
@@ -162,7 +180,7 @@ class MeetupController extends BaseController
             return redirect()->to('/flightmeet/meetups')->with('error', 'Flugtreffen wurde nicht gefunden.');
         }
 
-        // Berechtigungsprüfung
+        // Sicherheitsprüfung: Nur der Ersteller darf editieren
         if ((int)$meetup['creator_id'] !== (int)$currentUserId) {
             return redirect()->to('/flightmeet/meetups/' . $id)->with('error', 'Du bist nicht berechtigt, dieses Treffen zu bearbeiten.');
         }
@@ -181,6 +199,7 @@ class MeetupController extends BaseController
             $longitude = $this->request->getPost('longitude') ?: null;
             $status = $this->request->getPost('status') ?: 'geplant';
 
+            // Validierung analog zur Erstellung
             if (empty($title) || empty($location) || empty($region) || empty($meetDate) || empty($meetTime) || empty($level) || empty($maxParticipants) || empty($latitude) || empty($description)) {
                 return redirect()->back()->withInput()->with('error', 'Bitte füllen Sie alle erforderlichen Felder aus.');
             }
@@ -218,6 +237,9 @@ class MeetupController extends BaseController
         ]));
     }
 
+    /**
+     * Flugtreffen löschen (Eigentümer-exklusiv)
+     */
     public function delete(int $id): ResponseInterface
     {
         $currentUserId = session()->get('fm_user_id');
@@ -227,7 +249,7 @@ class MeetupController extends BaseController
             return redirect()->to('/flightmeet/meetups')->with('error', 'Flugtreffen wurde nicht gefunden.');
         }
 
-        // Berechtigungsprüfung
+        // Sicherheitsprüfung: Nur der Ersteller darf das Inserat löschen
         if ((int)$meetup['creator_id'] !== (int)$currentUserId) {
             return redirect()->to('/flightmeet/meetups/' . $id)->with('error', 'Du bist nicht berechtigt, dieses Treffen zu löschen.');
         }

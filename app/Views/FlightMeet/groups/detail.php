@@ -306,7 +306,7 @@
                             Weiter <i class="ph ph-caret-right"></i>
                         </button>
                     </div>
-                    <div class="fm-calendar-grid" id="calendar-days-grid">
+                    <div class="fm-calendar-grid" id="calendar-grid">
                         <!-- Wochentage & Zellen werden per JS injiziert -->
                     </div>
                 </div>
@@ -396,7 +396,7 @@
                                 <?php endif; ?>
                             </div>
 
-                            <!-- Administrative Aktionen mit den neuen, modernen CSS-Klassen -->
+                            <!-- Mitgliederverwaltung -->
                             <?php if (in_array($user_role, ['owner', 'admin'], true) && (int)$m['user_id'] !== (int)session()->get('fm_user_id') && $m['role'] !== 'owner'): ?>
                                 <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
                                     <?php if ($user_role === 'owner'): ?>
@@ -469,7 +469,7 @@
 
                     // Generischen Kalender initialisieren
                     const calendarFlights = <?= json_encode(array_merge($scheduled_flights, $historic_flights)) ?>;
-                    gCalendar = new DynamicFlightCalendar('calendar-days-grid', calendarFlights, '<?= base_url() ?>', '<?= $group['id'] ?>');
+                    gCalendar = new DynamicFlightCalendar('calendar', calendarFlights, '<?= base_url() ?>', '<?= $group['id'] ?>');
 
                     // Event-Handler für die Buttons zuweisen
                     window.prevMonth = () => { gCalendar.prev(); };
