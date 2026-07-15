@@ -25,6 +25,11 @@
         <li class="<?= ($active ?? '') === 'profile' ? 'active' : '' ?>">
             <a href="<?= base_url('flightmeet/profile') ?>">Profil</a>
         </li>
+        <?php if (session()->get('fm_user_role') === 'admin'): ?>
+            <li class="<?= ($active ?? '') === 'admin' ? 'active' : '' ?>">
+                <a href="<?= base_url('flightmeet/admin/personen') ?>">Admin</a>
+            </li>
+        <?php endif; ?>
         <li class="fm-menu-form">
             <form method="post" action="<?= site_url('flightmeet/auth/logout') ?>">
                 <?= csrf_field() ?>

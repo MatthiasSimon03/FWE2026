@@ -155,6 +155,14 @@ Diese Tabelle speichert die Tokens für die Funktion "Angemeldet bleiben" (Remem
 
 ---
 
+### 2.9. `fm_user_regions` (Regionenpräferenzen der Nutzer)
+| Spaltenname | Datentyp | Einschränkung | Beschreibung |
+| :--- | :--- | :--- | :--- |
+| `user_id` | `INT` | `PRIMARY KEY`, `FOREIGN KEY` | Referenziert den Nutzer in `fm_users(id)`. |
+| `region` | `VARCHAR(100)` | `PRIMARY KEY` | Name der Region, die der Nutzer als Präferenz gesetzt hat. |
+
+---
+
 ## 3. Implementierungshinweise für CodeIgniter 4
 
 ### 3.1 Gruppen und Mitgliedschaft

@@ -324,6 +324,33 @@ class MeetupModel extends Model
             ->update(['status' => 'abgeschlossen']);
     }
 
+    /**
+     * Holt die 3 neuesten geplanten/ausgebuchten Flugtreffen aus Gruppen,
+     * in denen der aktuelle Benutzer Mitglied ist.
+     */
+    public function getLatestGroupMeetups(int $userId, int $limit = 3): array
+    {
+        return $this->db->table($this->table . ' fm')
+            ->select('fm.id, fm.title, fm.location, fm.meet_date, fm.meet_time, g.name as group_name, g.id as group_id, u.username as creator_name')
+            // JOIN 1: Finde Gruppen, in denen der Ersteller des Treffens Mitglied ist
+            ->join('fm_group_members creator_gm', 'creator_gm.user_id = fm.creator_id')
+            // JOIN 2: Finde heraus, ob der aktuelle User in derselben Gruppe Mitglied ist
+            ->join('fm_group_members user_gm', 'user_gm.group_id = creator_gm.group_id AND user_gm.user_id = ' . (int)$userId)
+            // JOIN 3: Gruppen-Details für den Gruppennamen laden
+            ->join('fm_groups g', 'g.id = creator_gm.group_id')
+            // JOIN 4: Ersteller-Details laden (für optionale Anzeige des Namens)
+            ->join('fm_users u', 'u.id = fm.creator_id')
+            // Nur geplante oder ausgebuchte Treffen anzeigen
+            ->whereIn('fm.status', ['geplant', 'ausgebucht'])
+            // Verhindert doppelte Treffen-Einträge, falls mehrere Schnittmengen existieren
+            ->groupBy('fm.id')
+            // Sortiert nach Erstellungs-ID absteigend (die neuesten zuerst)
+            ->orderBy('fm.id', 'DESC')
+            ->limit($limit)
+            ->get()
+            ->getResultArray();
+    }
+
 
 }
 

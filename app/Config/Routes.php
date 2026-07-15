@@ -47,6 +47,8 @@ $routes->group('flightmeet', ['filter' => 'fm_auth', 'namespace' => 'App\Control
     $routes->post('groups/demote/(:num)/(:num)', 'GroupController::demoteFromAdmin/$1/$2');
     $routes->post('groups/transfer-owner/(:num)/(:num)', 'GroupController::transferOwner/$1/$2');
     $routes->post('groups/remove-member/(:num)/(:num)', 'GroupController::removeMember/$1/$2');
+
+    $routes->get('admin/personen', 'AdminController::personen');
 });
 
 // FlightMeet Login (ohne Filter, der Zugriff schützt)
@@ -56,6 +58,21 @@ $routes->group('flightmeet', ['namespace' => 'App\\Controllers\\FlightMeet'], st
     $routes->get('auth/register', 'Auth::register');
     $routes->post('auth/register', 'Auth::register');
     $routes->post('auth/logout', 'Auth::logout');
+});
+
+// FlightMeet REST API Routen für Administratoren
+$routes->group('api/flightmeet/admin', ['namespace' => 'App\Controllers\FlightMeet\Admin'], static function ($routes) {
+
+    // Öffentliche Route zum Einloggen (Erhalt des Tokens)
+    $routes->post('auth/login', 'ApiAuthController::login');
+
+    // Durch den 'fm_api_admin'-Filter geschützte Admin-Routen
+    $routes->group('', ['filter' => 'fm_api_admin'], static function ($routes) {
+        $routes->get('users', 'ApiUserController::index');
+        $routes->put('users/(:num)', 'ApiUserController::update/$1');
+        $routes->delete('users/(:num)', 'ApiUserController::delete/$1');
+    });
+
 });
 
 

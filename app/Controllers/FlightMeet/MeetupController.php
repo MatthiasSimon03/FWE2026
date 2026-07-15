@@ -71,12 +71,14 @@ class MeetupController extends BaseController
         // Kontext-Tracking: Ermöglicht eine "Zurück zur Gruppe"-Navigation, falls von dort aufgerufen
         $fromGroup = $this->request->getGet('from_group');
         $meetup['from_group'] = $fromGroup ? (int)$fromGroup : null;
+        $fromPage = $this->request->getGet('from');
 
         return $this->response->setBody(view('FlightMeet/meetupDetail', [
             'title'  => 'FlightMeet - Detail',
             'active' => 'meetups',
             'meetup' => $meetup,
             'from_group' => $meetup['from_group'],
+            'from_page' => $fromPage,
         ]));
     }
 

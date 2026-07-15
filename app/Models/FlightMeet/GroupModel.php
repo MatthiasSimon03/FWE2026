@@ -79,4 +79,38 @@ class GroupModel extends Model
             ->get()
             ->getResultArray();
     }
+
+    /**
+     * Holt personalisierte Gruppenempfehlungen basierend auf den Lieblingsregionen des Nutzers
+     */
+    public function getRecommendedGroups(int $userId, int $limit = 2): array
+    {
+        // 1. Hole die ausgewählten Regionen des Users aus der neuen Tabelle
+        $userRegions = $this->db->table('fm_user_regions')
+            ->where('user_id', $userId)
+            ->get()
+            ->getResultArray();
+
+        // Wenn der User keine Lieblingsregionen ausgewählt hat, gibt es keine Empfehlungen
+        if (empty($userRegions)) {
+            return [];
+        }
+
+        $regions = array_column($userRegions, 'region');
+
+        // 2. Finde passende Gruppen in diesen Regionen, in denen der User noch KEIN Mitglied ist
+        return $this->db->table($this->table . ' g')
+            ->select('g.id, g.name, g.region, g.visibility, COUNT(m.user_id) as members_count')
+            // JOIN 1: Prüfen, ob der aktuelle User bereits Mitglied der Gruppe ist (muss NULL sein)
+            ->join('fm_group_members user_m', 'user_m.group_id = g.id AND user_m.user_id = ' . (int)$userId, 'left')
+            // JOIN 2: Alle Mitglieder der Gruppe zählen, um nach Beliebtheit zu sortieren
+            ->join('fm_group_members m', 'm.group_id = g.id', 'left')
+            ->whereIn('g.region', $regions)
+            ->where('user_m.user_id', null) // Ausschluss bereits beigetretener Gruppen
+            ->groupBy('g.id')
+            ->orderBy('members_count', 'DESC')
+            ->limit($limit)
+            ->get()
+            ->getResultArray();
+    }
 }

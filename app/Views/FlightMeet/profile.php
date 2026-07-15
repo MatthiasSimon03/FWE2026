@@ -137,7 +137,21 @@
                             </dd>
                         </div>
 
-                        <!-- NEU: Pilot-Statistiken -->
+                        <!-- NEU: Meine Regionen (Anzeige-Modus) -->
+                        <div class="fm-detail-info-item">
+                            <dt>Meine Regionen</dt>
+                            <dd style="display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; max-width: 70%;">
+                                <?php if (empty($user_regions)): ?>
+                                    <span style="font-style: italic; font-size: 0.85rem; color: var(--color-text-muted);">Keine ausgewählt</span>
+                                <?php else: ?>
+                                    <?php foreach ($user_regions as $region): ?>
+                                        <span class="fm-badge-region" style="font-size: 0.75rem; padding: 2px 8px;"><?= esc($region) ?></span>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </dd>
+                        </div>
+
+                        <!-- Pilot-Statistiken -->
                         <div class="fm-detail-info-item" style="border-top: 1px dashed var(--color-border-medium); padding-top: 12px; margin-top: 12px;">
                             <dt>Absolvierte Flüge</dt>
                             <dd><span class="fm-status fm-status--aktiv" style="font-weight: 700; font-size: 0.85rem; padding: 2px 10px;"><?= esc($stats['completed']) ?></span></dd>
@@ -167,6 +181,23 @@
                                 <option value="Profi" <?= $user['experience_level'] === 'Profi' ? 'selected' : '' ?>>Profi</option>
                             </select>
                         </label>
+
+                        <!-- NEU: Regionen-Auswahl (Bearbeiten-Modus) -->
+                        <div class="fm-field" style="margin-top: 6px;">
+                            <span class="fm-field__label" style="font-size: 0.75rem; margin-bottom: 6px; display: block;">Meine Flugregionen</span>
+                            <div style="display: flex; flex-direction: column; gap: 6px; background: var(--color-bg-light); padding: 10px; border-radius: 8px; border: 1px solid var(--color-border-card); max-height: 150px; overflow-y: auto;">
+                                <?php if (empty($all_regions)): ?>
+                                    <span style="font-size: 0.8rem; font-style: italic; color: var(--color-text-muted);">Keine Regionen im System</span>
+                                <?php else: ?>
+                                    <?php foreach ($all_regions as $region): ?>
+                                        <label style="display: flex; align-items: center; gap: 8px; font-size: 0.85rem; cursor: pointer; color: var(--color-text-title);">
+                                            <input type="checkbox" name="regions[]" value="<?= esc($region) ?>" <?= in_array($region, $user_regions, true) ? 'checked' : '' ?> style="cursor: pointer; width: 14px; height: 14px;">
+                                            <span><?= esc($region) ?></span>
+                                        </label>
+                                    <?php endforeach; ?>
+                                <?php endif; ?>
+                            </div>
+                        </div>
 
                         <div style="display: flex; gap: 8px; margin-top: 12px;">
                             <button type="submit" class="btn" style="padding: 6px 10px; font-size: 0.85rem; flex: 1; border: none; cursor: pointer;">Speichern</button>

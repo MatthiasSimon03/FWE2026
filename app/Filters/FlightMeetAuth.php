@@ -40,6 +40,7 @@ class FlightMeetAuth implements FilterInterface
                                 'fm_username' => $user['username'],
                                 'fm_email' => $user['email'],
                                 'fm_role' => $user['role'] ?? 'user',
+                                'fm_user_role' => $user['role'] ?? 'user',
                                 'fm_experience_level' => $user['experience_level'] ?? '',
                             ]);
 

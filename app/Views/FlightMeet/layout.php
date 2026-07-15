@@ -13,7 +13,7 @@
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/@phosphor-icons/web@2.1.1/src/regular/style.css">
 
     <!-- Flatpickr CSS laden -->
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/themes/material_blue.css">
 
 
@@ -34,8 +34,8 @@
     <?= $this->renderSection('content') ?>
 </main>
 
-<footer>
-    <?= view('FlightMeet/partials/footer') ?>
+<footer class="footer">
+    <p>&copy; 2026 FlightMeet Team 14</p>
 </footer>
 
 <script src="<?= base_url('assets/js/flightmeet.js') ?>"></script>

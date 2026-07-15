@@ -149,12 +149,18 @@
                     <?php endif; ?>
 
                     <!-- Link zurück zur Übersicht (dynamisch je nach Herkunft) -->
-                    <?php if (!empty($from_group)): ?>
+                    <?php if ($from_page === 'home'): ?>
+                        <a class="btn-secondary-full" href="<?= site_url('flightmeet') ?>">
+                            Zurück zur Startseite
+                        </a>
+                    <?php elseif (!empty($from_group)): ?>
                         <a class="btn-secondary-full" href="<?= base_url('flightmeet/groups/detail/' . esc($from_group)) ?>">
                             Zurück zur Gruppe
                         </a>
                     <?php else: ?>
-                        <a class="btn-secondary-full" href="<?= base_url('flightmeet/meetups') ?>">Zurück zur Übersicht</a>
+                        <a class="btn-secondary-full" href="<?= base_url('flightmeet/meetups') ?>">
+                            Zurück zur Übersicht
+                        </a>
                     <?php endif; ?>
                 </div>
 
@@ -206,6 +212,16 @@
                             <strong id="weather-wind"></strong>
                         </div>
                     </div>
+                    <!-- NEU: Windböen -->
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--color-text-muted);">Stärkste Windböen:</span>
+                        <strong id="weather-gusts"></strong>
+                    </div>
+                    <!-- NEU: Windrichtung -->
+                    <div style="display: flex; justify-content: space-between;">
+                        <span style="color: var(--color-text-muted);">Hauptwindrichtung:</span>
+                        <strong id="weather-direction"></strong>
+                    </div>
                 </div>
 
                 <p id="weather-error" style="display: none; color: var(--color-text-muted-light); font-size: 0.85rem; font-style: italic; margin: 0;"></p>
@@ -228,7 +244,13 @@
         });
         var marker = L.marker([<?= esc($meetup['latitude']) ?>, <?= esc($meetup['longitude']) ?>], {icon: paragliderIcon}).addTo(map);
 
-        // ASYNCHRONER WETTER-ABRUF (OPEN-METEO API)
+        // Hilfsfunktion zur Umrechnung von Grad in Himmelsrichtungen
+        function getWindDirection(degree) {
+            const directions = ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'];
+            const index = Math.round(((degree % 360) / 45)) % 8;
+            return directions[index];
+        }
+
         document.addEventListener('DOMContentLoaded', () => {
             const lat = <?= esc($meetup['latitude']) ?>;
             const lng = <?= esc($meetup['longitude']) ?>;
@@ -238,7 +260,6 @@
             const infoEl = document.getElementById('weather-info');
             const errorEl = document.getElementById('weather-error');
 
-            // Abgleich der Tage: Prognose ist bei Open-Meteo erst 14 Tage vor dem Termin verfügbar
             const today = new Date();
             today.setHours(0, 0, 0, 0);
             const targetDate = new Date(meetDate);
@@ -254,8 +275,8 @@
                 return;
             }
 
-            // API URL bauen
-            const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max&timezone=auto&start_date=${meetDate}&end_date=${meetDate}`;
+            // API URL mit wind_gusts_10m_max und wind_direction_10m_dominant erweitert
+            const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant&timezone=auto&start_date=${meetDate}&end_date=${meetDate}`;
 
             fetch(apiUrl)
                 .then(response => {
@@ -267,11 +288,14 @@
                         throw new Error('Keine Wetterdaten verfügbar');
                     }
 
-                    // WMO Weathercodes in Text & Phosphor Icons übersetzen
                     const weatherCode = data.daily.weather_code[0];
                     const tempMax = Math.round(data.daily.temperature_2m_max[0]);
                     const tempMin = Math.round(data.daily.temperature_2m_min[0]);
+
+                    // Neue Winddaten auslesen
                     const windMax = Math.round(data.daily.wind_speed_10m_max[0]);
+                    const gustsMax = data.daily.wind_gusts_10m_max ? Math.round(data.daily.wind_gusts_10m_max[0]) : null;
+                    const windDirDeg = data.daily.wind_direction_10m_dominant ? data.daily.wind_direction_10m_dominant[0] : null;
 
                     const weatherMap = {
                         0: { desc: 'Sonnig/Wolkenlos', icon: 'ph-sun' },
@@ -302,7 +326,21 @@
                     document.getElementById('weather-desc').innerText = wDetails.desc;
                     document.getElementById('weather-wind').innerText = `${windMax} km/h`;
 
-                    // Icon-Klasse dynamisch setzen
+                    // Böen anzeigen
+                    if (gustsMax !== null) {
+                        document.getElementById('weather-gusts').innerText = `${gustsMax} km/h`;
+                    } else {
+                        document.getElementById('weather-gusts').innerText = '--';
+                    }
+
+                    // Windrichtung übersetzen und anzeigen
+                    if (windDirDeg !== null) {
+                        const dirText = getWindDirection(windDirDeg);
+                        document.getElementById('weather-direction').innerText = `${dirText} (${windDirDeg}°)`;
+                    } else {
+                        document.getElementById('weather-direction').innerText = '--';
+                    }
+
                     const iconEl = document.getElementById('weather-icon');
                     iconEl.className = `ph ${wDetails.icon}`;
 

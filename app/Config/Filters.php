@@ -34,7 +34,8 @@ class Filters extends BaseFilters
         'forcehttps'    => ForceHTTPS::class,
         'pagecache'     => PageCache::class,
         'performance'   => PerformanceMetrics::class,
-        'fm_auth' => \App\Filters\FlightMeetAuth::class,
+        'fm_auth'       => \App\Filters\FlightMeetAuth::class,
+        'fm_api_admin'  => \App\Filters\FlightMeetAdminFilter::class,
     ];
 
     /**
