@@ -1,11 +1,11 @@
-// Scope isolieren, um globale Namenskonflikte zu vermeiden
+// Kapselung der App-Logik im DOM-Ready-Event zur Vermeidung globaler Namenskonflikte
 document.addEventListener('DOMContentLoaded', () => {
 
-	// HILFSFUNKTION: Mobile-Abfrage zentralisiert
+	// HILFSFUNKTION: Responsive Erkennung basierend auf Viewport-Breite
 	const isMobileQuery = window.matchMedia('(max-width: 768px)');
 	const isMobile = () => isMobileQuery.matches;
 
-	// 1. NAVIGATION & MENÜ-TOGGLE (MOBILE)
+	// 1. NAVIGATION & MENÜ-TOGGLE (MOBILE HAMBURGER-MENÜ)
 	const menuToggle = document.getElementById('fmMenuToggle');
 	const menu = document.getElementById('fmMenu');
 
@@ -16,12 +16,13 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
-	// 2. ANSICHT-UMSCHALTER (KARTEN VS. TABELLE)
+	// 2. ANSICHT-UMSCHALTER (KARTEN VS. TABELLE MIT LOCALSTORAGE)
 	const viewButtons = document.querySelectorAll('.fm-toggle-btn');
 	const cardsView = document.getElementById('fmCardsView');
 	const tableView = document.getElementById('fmTableView');
 	const VIEW_STORAGE_KEY = 'flightmeet_view';
 
+	// Steuert die Sichtbarkeit der Listen-Elemente und aktiven Button-Zustände
 	const setActiveView = (view) => {
 		if (!cardsView || !tableView) return;
 
@@ -36,10 +37,12 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	};
 
+	// Mobilgeräte erzwingen Kacheln, ansonsten letzten Zustand aus LocalStorage laden
 	const storedView = localStorage.getItem(VIEW_STORAGE_KEY) || 'cards';
 	const initialView = isMobile() ? 'cards' : storedView;
 	setActiveView(initialView);
 
+	// Event-Listener für Klick-Aktionen registrieren
 	viewButtons.forEach((button) => {
 		button.addEventListener('click', () => {
 			const view = button.dataset.view || 'cards';
@@ -54,7 +57,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		if (cardsBtn) cardsBtn.click();
 	}
 
-	// 3. AUTO-SUBMIT FÜR FILTER-CHECKBOXEN
+	// 3. AUTO-SUBMIT FÜR FILTER-CHECKBOXEN (Status-Filterung)
 	document.querySelectorAll('input[data-auto-submit="status"]').forEach((checkbox) => {
 		checkbox.addEventListener('change', () => {
 			const form = checkbox.closest('form');
@@ -64,7 +67,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	});
 
-	// 4. MAP-PICKER LOGIK (NUR AKTIV BEIM ERSTELLEN/BEARBEITEN)
+	// 4. MAP-PICKER LOGIK (Leaflet-Koordinaten-Picker bei Erstellung / Bearbeitung)
 	const mapPickerEl = document.getElementById('map-picker');
 
 	if (mapPickerEl && typeof L !== 'undefined') {
@@ -82,6 +85,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		const initialLng = oldLng ? parseFloat(oldLng) : defaultLng;
 		const hasInitialMarker = (oldLat !== '' && oldLng !== '');
 
+		// Karte initialisieren (Zoomstufe abhängig von bereits gesetzten Koordinaten)
 		const mapPicker = L.map('map-picker').setView(
 			[initialLat, initialLng],
 			hasInitialMarker ? 13 : defaultZoom
@@ -110,6 +114,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			updateIndicator(initialLat, initialLng);
 		}
 
+		// Klick-Listener auf Karte zum Setzen und Aktualisieren des Startplatz-Markers
 		mapPicker.on('click', function(e) {
 			const lat = e.latlng.lat;
 			const lng = e.latlng.lng;
@@ -126,6 +131,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			updateIndicator(lat, lng);
 		});
 
+		// Nominatim Ortssuche bei Eingabe einer Region/Stadt
 		const regionInput = document.getElementById('region');
 
 		if (regionInput) {
@@ -147,6 +153,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			});
 		}
 
+		// Koordinaten-Anzeige unter der Karte aktualisieren
 		function updateIndicator(lat, lng) {
 			const indicator = document.getElementById('coords-indicator');
 			if (indicator) {
@@ -157,7 +164,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	}
 
-	// 5. ASYNCHRONES CHATSYSTEM (POLLING, SENDEN, DATUM-FNS)
+	// 5. ASYNCHRONES CHATSYSTEM (Polling, Senden, date-fns Lokalisierung)
 	const messagesArea = document.getElementById('chat-messages-area');
 	const messagesContainer = document.getElementById('messages-container');
 	const loadMoreBtn = document.getElementById('load-more-btn');
@@ -173,6 +180,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		let isInitialLoad = true;
 		const BASE_CHAT_URL = 'chat';
 
+		// Kanalwechsel (Global, DMs, Gruppe, Flugtreffen) verarbeiten
 		document.querySelectorAll('.fm-chat-item').forEach((item) => {
 			item.addEventListener('click', () => {
 				document.querySelectorAll('.fm-chat-item').forEach(el => el.classList.remove('is-active'));
@@ -206,6 +214,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			});
 		});
 
+		// Mobile Ansicht: Zurück zur Kanalliste
 		const backBtn = document.getElementById('chat-back-btn');
 		if (backBtn) {
 			backBtn.addEventListener('click', () => {
@@ -216,6 +225,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			});
 		}
 
+		// Überprüfung auf vordefinierte Direktnachricht-Weiterleitungen (z.B. über Treffen-Sidebar)
 		const triggerDM = document.getElementById('trigger-active-dm');
 		if (triggerDM) {
 			triggerDM.click();
@@ -224,6 +234,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			restartPolling();
 		}
 
+		// HTTP-Anfrage zum Holen der Nachrichten
 		function loadMessages(isLoadMore = false) {
 			const offset = isLoadMore ? currentOffset : 0;
 			const url = `${BASE_CHAT_URL}/getMessages?type=${currentType}&target_id=${currentTargetId || ''}&offset=${offset}`;
@@ -236,6 +247,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 						renderMessages(data.messages, data.userId, isLoadMore);
 
+						// Paginierung steuern ("Ältere laden" Button ein- oder ausblenden)
 						if (isLoadMore) {
 							if (data.messages.length < 50) {
 								loadMoreBtn.style.display = 'none';
@@ -264,6 +276,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				.catch(err => console.error("Fehler beim Abrufen der Nachrichten:", err));
 		}
 
+		// Erstellt die DOM-Elemente für die empfangenen Nachrichten
 		function renderMessages(messages, currentUserId, isLoadMore) {
 			const previousScrollHeight = messagesArea.scrollHeight;
 
@@ -284,6 +297,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			let newMessagesCount = 0;
 
 			messages.forEach((msg) => {
+				// Duplikate vermeiden
 				if (document.getElementById(`msg-${msg.id}`)) return;
 
 				newMessagesCount++;
@@ -292,6 +306,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				wrapper.id = `msg-${msg.id}`;
 				wrapper.className = `fm-msg-bubble-wrapper ${isMe ? 'is-me' : 'is-other'}`;
 
+				// Relative Zeitangabe mithilfe von date-fns formatieren (z. B. "vor 5 Minuten")
 				let formattedTime = "";
 				try {
 					formattedTime = dateFns.formatDistanceToNow(new Date(msg.created_at), {
@@ -321,6 +336,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				return;
 			}
 
+			// Scroll-Position bei geladenen historischen Nachrichten stabilisieren
 			if (isLoadMore) {
 				messagesContainer.insertBefore(fragment, messagesContainer.firstChild);
 				messagesArea.scrollTop = messagesArea.scrollHeight - previousScrollHeight;
@@ -335,17 +351,20 @@ document.addEventListener('DOMContentLoaded', () => {
 
 				messagesContainer.appendChild(fragment);
 
+				// Nur scrollen, wenn der Benutzer beim Senden bereits ganz unten war
 				if (isInitialLoad || isNearBottom) {
 					scrollChatToBottom();
 				}
 			}
 		}
 
+		// Paginierung ausführen
 		loadMoreBtn.addEventListener('click', () => {
 			currentOffset += 50;
 			loadMessages(true);
 		});
 
+		// Formular-Versand abfangen und Nachricht via AJAX übergeben
 		chatForm.addEventListener('submit', async (e) => {
 			e.preventDefault();
 
@@ -359,7 +378,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 			try {
 				if (submitBtn) {
-					submitBtn.disabled = true;
+					submitBtn.disabled = true; // Senden-Button sperren (Double-Submit-Schutz)
 				}
 
 				const formData = new FormData();
@@ -408,6 +427,7 @@ document.addEventListener('DOMContentLoaded', () => {
 			messagesArea.scrollTop = messagesArea.scrollHeight;
 		}
 
+		// Short-Polling für die Echtzeit-Synchronisation starten (Intervall: 3 Sekunden)
 		function restartPolling() {
 			clearTimeout(pollingTimeout);
 
@@ -421,7 +441,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	}
 
-	// 6. DASHBOARD REGIONEN-CHART (CHART.JS)
+	// 6. DASHBOARD REGIONEN-CHART (Chart.js zur Aktivitätsdarstellung)
 	const regionChartEl = document.getElementById('regionChart');
 
 	if (regionChartEl && typeof Chart !== 'undefined') {
@@ -467,7 +487,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		}
 	}
 
-	// 7. TABELLEN-SORTIERUNG (LIST.JS)
+	// 7. TABELLEN-SORTIERUNG (List.js für die interaktive Tabellenansicht)
 	const tableViewEl = document.getElementById('fmTableView');
 	if (tableViewEl && typeof List !== 'undefined') {
 		new List('fmTableView', {
@@ -480,7 +500,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
-	// 8. DATUMS- & ZEIT-PICKER (FLATPICKR)
+	// 8. DATUMS- & ZEIT-PICKER (Flatpickr für Formulare)
 	const dateInput = document.getElementById('meet_date');
 	const timeInput = document.getElementById('meet_time');
 
@@ -503,7 +523,7 @@ document.addEventListener('DOMContentLoaded', () => {
 		});
 	}
 
-	// 9. GENERISCHER TAB-SWITCHER (Muss direkt im Haupt-DOMContentLoaded-Block registriert werden)
+	// 9. GENERISCHER TAB-SWITCHER (Muss global initialisiert werden)
 	document.querySelectorAll('[data-tab-target]').forEach(button => {
 		button.addEventListener('click', () => {
 			const container = button.closest('.fm-detail-layout') || document;
@@ -519,6 +539,7 @@ document.addEventListener('DOMContentLoaded', () => {
 				targetContent.style.display = 'block';
 			}
 
+			// Karten-Größe neu berechnen, falls sie sich im soeben eingeblendeten Tab befindet
 			if (targetId.includes('map') && typeof activeMapInstance !== 'undefined' && activeMapInstance) {
 				setTimeout(() => {
 					activeMapInstance.invalidateSize();
@@ -534,6 +555,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
 let activeMapInstance = null;
 
+// Renders anstehende Treffen auf einer interaktiven Leaflet-Karte
 function initDynamicFlightsMap(mapId) {
 	const mapEl = document.getElementById(mapId);
 	if (!mapEl || typeof L === 'undefined') return;
@@ -597,9 +619,9 @@ function initDynamicFlightsMap(mapId) {
 			bounds.push([lat, lng]);
 		}
 	});
-
 }
 
+// Kalender-Klasse zur Erzeugung und Steuerung einer dynamischen Grid-Monatsansicht
 class DynamicFlightCalendar {
 	constructor(containerId, flightsData, baseUrl, groupId = '') {
 		this.grid = document.getElementById(`${containerId}-grid`);
@@ -624,6 +646,7 @@ class DynamicFlightCalendar {
 
 		this.title.innerText = `${this.monate[month]} ${year}`;
 
+		// Wochentagszeile generieren
 		const wochentage = ['Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa', 'So'];
 		wochentage.forEach(day => {
 			const el = document.createElement('div');
@@ -638,6 +661,7 @@ class DynamicFlightCalendar {
 		const daysInMonth = new Date(year, month + 1, 0).getDate();
 		const daysInPrevMonth = new Date(year, month, 0).getDate();
 
+		// Fülltage des vorherigen Monats rendern
 		for (let i = leadDays - 1; i >= 0; i--) {
 			const el = document.createElement('div');
 			el.className = 'fm-calendar-day other-month';
@@ -645,6 +669,7 @@ class DynamicFlightCalendar {
 			this.grid.appendChild(el);
 		}
 
+		// Aktuelle Monatstage rendern
 		const today = new Date();
 		for (let day = 1; day <= daysInMonth; day++) {
 			const el = document.createElement('div');
@@ -660,6 +685,7 @@ class DynamicFlightCalendar {
 			const checkDay = String(day).padStart(2, '0');
 			const cellDateStr = `${year}-${checkMonth}-${checkDay}`;
 
+			// Flugtreffen am jeweiligen Tag filtern
 			const dayEvents = this.flightsData.filter(flight => flight.meet_date === cellDateStr);
 
 			if (dayEvents.length > 0) {
@@ -686,6 +712,7 @@ class DynamicFlightCalendar {
 			this.grid.appendChild(el);
 		}
 
+		// Fülltage des nächsten Monats rendern (um das 7x6 Raster symmetrisch zu schließen)
 		const totalCells = this.grid.children.length - 7;
 		const remainingCells = (7 - (totalCells % 7)) % 7;
 		for (let i = 1; i <= remainingCells; i++) {
@@ -707,6 +734,6 @@ class DynamicFlightCalendar {
 	}
 }
 
-// Global registrieren für window-Scope
+// Registrierung im globalen Window-Scope für externen Zugriff
 window.initDynamicFlightsMap = initDynamicFlightsMap;
 window.DynamicFlightCalendar = DynamicFlightCalendar;

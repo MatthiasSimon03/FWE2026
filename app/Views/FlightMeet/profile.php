@@ -1,6 +1,7 @@
 <?= $this->extend('FlightMeet/layout') ?>
 <?= $this->section('content') ?>
 
+    <!-- Feedback-Meldungen bei Erfolgen oder Fehlern (z. B. nach Profiländerungen) -->
 <?php if (session()->getFlashdata('success')): ?>
     <div class="alert alert-success"><?= esc(session()->getFlashdata('success')) ?></div>
 <?php endif; ?>
@@ -9,10 +10,12 @@
 <?php endif; ?>
 
     <div class="fm-detail-layout">
-        <!-- Linker Bereich: Aktivitäten-Tabs -->
+
+        <!-- Linker Bereich: Aktivitäten des Piloten -->
         <div class="fm-detail-main">
             <h2 class="fm-section-title" style="margin-top: 0;">Meine Aktivitäten</h2>
 
+            <!-- Navigation für die Haupt-Tabs (Liste, Karte, Kalender) -->
             <div class="fm-view-toggle" style="margin-bottom: 20px; display: inline-flex;">
                 <button class="fm-toggle-btn is-active" type="button" data-tab-target="tab-list">
                     <i class="ph ph-list-bullets" style="vertical-align: middle;"></i> Flugliste
@@ -27,11 +30,13 @@
 
             <!-- TAB 1: FLUGLISTE -->
             <div id="tab-list" class="tab-content">
+                <!-- Sub-Navigation innerhalb der Flugliste (Aktiv vs. Historie) -->
                 <div class="fm-view-toggle" style="margin-bottom: 15px; background-color: var(--color-bg-light); padding: 4px;">
                     <button class="fm-toggle-btn is-active" type="button" onclick="switchFlightTab('active')" style="font-size: 0.85rem;">Meine aktiven Flüge</button>
                     <button class="fm-toggle-btn" type="button" onclick="switchFlightTab('historic')" style="font-size: 0.85rem;">Meine Historie</button>
                 </div>
 
+                <!-- Anstehende Flüge -->
                 <div id="flights-active">
                     <?php if (empty($scheduled_flights)): ?>
                         <p class="fm-empty">Du bist aktuell bei keinen anstehenden Flügen angemeldet.</p>
@@ -54,6 +59,7 @@
                     <?php endif; ?>
                 </div>
 
+                <!-- Abgeschlossene/Vergangene Flüge -->
                 <div id="flights-historic" style="display: none;">
                     <?php if (empty($historic_flights)): ?>
                         <p class="fm-empty">Keine vergangenen Flüge in deiner Historie gefunden.</p>
@@ -78,6 +84,7 @@
 
             <!-- TAB 2: MEINE FLUGKARTE -->
             <div id="tab-map" class="tab-content" style="display: none;">
+                <!-- Kartencontainer für Leaflet-Marker. Übergabe der Daten und Assets via HTML5-Attribute -->
                 <div id="profile-flights-map"
                      style="height: 480px; width: 100%; border-radius: 12px; border: 1px solid var(--color-border-medium);"
                      data-flights='<?= json_encode($scheduled_flights) ?>'
@@ -97,9 +104,8 @@
                         <h3 id="p-cal-title" style="margin: 0; color: var(--color-text-title);"></h3>
                         <button class="fm-calendar-month-btn" onclick="pCalendar.next()">Weiter ▶</button>
                     </div>
-                    <div class="fm-calendar-grid" id="p-cal-grid">
-                        <!-- Wird per JS injiziert -->
-                    </div>
+                    <!-- Grid-Inhalt wird dynamisch via flightmeet.js gerendert -->
+                    <div class="fm-calendar-grid" id="p-cal-grid"></div>
                 </div>
             </div>
         </div>
@@ -108,7 +114,7 @@
         <div class="fm-detail-sidebar">
             <div class="fm-detail-card">
 
-                <!-- Überschrift mit dezentem Edit-Pencil -->
+                <!-- Profil-Header mit Editier-Umschalter -->
                 <h3 class="fm-detail-card-title" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 0; margin-bottom: 20px;">
                     <span>Mein Profil</span>
                     <button id="toggle-edit-profile" class="btn-action-edit" title="Profil bearbeiten" style="background: none; border: none; cursor: pointer; padding: 0;">
@@ -116,7 +122,7 @@
                     </button>
                 </h3>
 
-                <!-- A: STANDARD-ANZEIGE-MODUS -->
+                <!-- A: PROFIL-ANZEIGEMODUS -->
                 <div id="profile-display-view">
                     <dl class="fm-detail-info-list">
                         <div class="fm-detail-info-item">
@@ -137,7 +143,7 @@
                             </dd>
                         </div>
 
-                        <!-- NEU: Meine Regionen (Anzeige-Modus) -->
+                        <!-- Lieblingsregionen des Nutzers -->
                         <div class="fm-detail-info-item">
                             <dt>Meine Regionen</dt>
                             <dd style="display: flex; flex-wrap: wrap; gap: 4px; justify-content: flex-end; max-width: 70%;">
@@ -163,7 +169,7 @@
                     </dl>
                 </div>
 
-                <!-- B: INLINE BEARBEITEN-MODUS (Umschaltbar per JS) -->
+                <!-- B: INLINE BEARBEITEN-MODUS -->
                 <div id="profile-edit-view" style="display: none;">
                     <form method="post" action="<?= base_url('flightmeet/profile') ?>" class="fm-form-grid" style="gap: 12px;">
                         <?= csrf_field() ?>
@@ -182,7 +188,7 @@
                             </select>
                         </label>
 
-                        <!-- NEU: Regionen-Auswahl (Bearbeiten-Modus) -->
+                        <!-- Regionen-Zuweisung mit Mehrfachauswahl -->
                         <div class="fm-field" style="margin-top: 6px;">
                             <span class="fm-field__label" style="font-size: 0.75rem; margin-bottom: 6px; display: block;">Meine Flugregionen</span>
                             <div style="display: flex; flex-direction: column; gap: 6px; background: var(--color-bg-light); padding: 10px; border-radius: 8px; border: 1px solid var(--color-border-card); max-height: 150px; overflow-y: auto;">
@@ -206,6 +212,7 @@
                     </form>
                 </div>
 
+                <!-- Balkendiagramm für die saisonale Flugaktivität (Monats-Statistik) -->
                 <div class="card" style="margin-top: 20px; background: var(--color-bg-white); border-color: var(--color-border-card); padding: 16px;">
                     <h4 class="fm-sidebar-subtitle" style="margin: 0 0 12px 0;">Saison-Aktivität (<?= date('Y') ?>)</h4>
                     <canvas id="profileActiveChart" data-stats='<?= json_encode($months_data) ?>' style="max-height: 150px; width: 100%;"></canvas>
@@ -213,7 +220,7 @@
 
                 <hr class="fm-divider">
 
-                <!-- Liste der Gruppen, in denen der Benutzer Mitglied ist -->
+                <!-- Liste der beigetretenen Gruppen -->
                 <h4 class="fm-sidebar-subtitle">Meine Gruppen (<?= count($joined_groups) ?>)</h4>
                 <?php if (empty($joined_groups)): ?>
                     <p class="fm-empty-text">Du bist aktuell in keiner Gruppe Mitglied.</p>
@@ -237,7 +244,7 @@
 
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // 1. FLUG-LISTE-TABS (Geplant vs. Historisch)
+        // Sub-Tabs innerhalb der Flugliste umschalten
         function switchFlightTab(tab) {
             const buttons = document.querySelectorAll('#tab-list .fm-view-toggle button');
             const activeFlightsDiv = document.getElementById('flights-active');
@@ -259,23 +266,22 @@
         let pCalendar = null;
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Wartet in sehr kurzen Abständen, bis flightmeet.js geladen und bereit ist
+            // Zyklische Prüfung, um Race Conditions beim Laden von flightmeet.js zu verhindern
             const checkInterval = setInterval(() => {
                 if (typeof initDynamicFlightsMap !== 'undefined' && typeof DynamicFlightCalendar !== 'undefined') {
-                    clearInterval(checkInterval); // Intervall stoppen, sobald Funktionen existieren
+                    clearInterval(checkInterval);
 
-                    // Generische Map für das Profil initialisieren
+                    // Karte und Kalender mit den übergebenen PHP-Daten initialisieren
                     initDynamicFlightsMap('profile-flights-map');
 
-                    // Generischen Kalender für das Profil initialisieren
                     const calendarFlights = <?= json_encode(array_merge($scheduled_flights, $historic_flights)) ?>;
                     pCalendar = new DynamicFlightCalendar('p-cal', calendarFlights, '<?= base_url() ?>');
                     pCalendar.render();
                     initProfileChart();
                 }
-            }, 30); // Alle 30ms prüfen
+            }, 30);
 
-            // Inline-Formular Umschalt-Logik per Klick auf das Stift-Icon
+            // Logik zum Hin- und Herwechseln zwischen Anzeige- und Editier-Modus
             const toggleBtn = document.getElementById('toggle-edit-profile');
             const cancelBtn = document.getElementById('cancel-edit-profile');
             const displayView = document.getElementById('profile-display-view');
@@ -298,7 +304,10 @@
                 const icon = toggleBtn?.querySelector('i');
                 if (icon) icon.className = 'ph ph-pencil';
             });
-        });function initProfileChart() {
+        });
+
+        // Diagramm für die monatlichen Saison-Flüge rendern
+        function initProfileChart() {
             const chartEl = document.getElementById('profileActiveChart');
             if (chartEl && typeof Chart !== 'undefined') {
                 const rawData = JSON.parse(chartEl.dataset.stats || '[]');

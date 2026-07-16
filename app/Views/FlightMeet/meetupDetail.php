@@ -13,7 +13,7 @@
         }
     </style>
 
-    <!-- NEU: Globale Feedback-Meldungen (Erfolg / Fehler) -->
+    <!-- Globale Erfolgs- und Fehlermeldungen (z. B. nach Anmeldung/Abmeldung) -->
 <?php if (session()->getFlashdata('success')): ?>
     <div class="alert alert-success">
         <?= esc(session()->getFlashdata('success')) ?>
@@ -26,40 +26,92 @@
     </div>
 <?php endif; ?>
 
+    <!-- Zweispaltiges Detail-Layout -->
     <div class="fm-detail-layout">
-        <!-- Linker Bereich: Hauptinhalt & Karte -->
+
+        <!-- LINKER BEREICH: Hauptinhalt, Karte und Wetter -->
         <div class="fm-detail-main">
 
-            <!-- Titel-Header mit Flex-Layout für die Icons -->
             <div class="fm-detail-header">
                 <h1 class="fm-detail-title" style="margin: 0;"><?= esc($meetup['title']) ?></h1>
             </div>
 
             <p class="lead fm-detail-desc"><?= esc($meetup['description']) ?></p>
 
+            <!-- Startplatz-Karte -->
             <div class="fm-detail-map-section">
                 <h2 class="fm-section-title">Karte / Startplatz</h2>
                 <div id="map"></div>
             </div>
+
+            <!-- Wettervorhersage: Platziert im breiteren Hauptbereich unter der Karte -->
+            <div class="fm-detail-weather-section" style="margin-top: 30px;">
+                <h2 class="fm-section-title" style="display: flex; align-items: center; gap: 8px;">
+                    <i class="ph ph-cloud-sun" style="font-size: 1.3rem; color: var(--color-primary);"></i>
+                    <span>Wettervorhersage für den Startplatz</span>
+                </h2>
+
+                <div class="fm-detail-card" style="margin-top: 10px;">
+                    <!-- Lade-Indikator während des API-Requests -->
+                    <div id="weather-loading" style="color: var(--color-text-muted); font-size: 0.9rem;">
+                        <i class="ph ph-spinner-gap weather-spin"></i> Lade Wetterdaten...
+                    </div>
+
+                    <!-- Horizontales Grid zur optimalen Platzausnutzung -->
+                    <div id="weather-info" style="display: none;">
+                        <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 24px; align-items: center;">
+
+                            <!-- Temperatur & Kurzbeschreibung -->
+                            <div style="display: flex; align-items: center; gap: 20px;">
+                                <i id="weather-icon" class="ph" style="font-size: 3.5rem; color: var(--color-primary);"></i>
+                                <div>
+                                    <span id="weather-temp" style="font-size: 1.8rem; font-weight: 700; color: var(--color-text-title); line-height: 1.1;"></span>
+                                    <p id="weather-desc" style="margin: 6px 0 0 0; font-size: 0.95rem; color: var(--color-text-muted-dark); font-weight: 500;"></p>
+                                </div>
+                            </div>
+
+                            <!-- Windstatistiken -->
+                            <div style="display: grid; grid-template-columns: 1fr; gap: 10px;">
+                                <div style="display: flex; justify-content: space-between; font-size: 0.9rem; border-bottom: 1px dashed var(--color-border-medium); padding-bottom: 6px;">
+                                    <span style="color: var(--color-text-muted);">Max. Windgeschwindigkeit:</span>
+                                    <strong id="weather-wind"></strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.9rem; border-bottom: 1px dashed var(--color-border-medium); padding-bottom: 6px;">
+                                    <span style="color: var(--color-text-muted);">Stärkste Windböen:</span>
+                                    <strong id="weather-gusts"></strong>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 0.9rem; padding-bottom: 2px;">
+                                    <span style="color: var(--color-text-muted);">Hauptwindrichtung:</span>
+                                    <strong id="weather-direction"></strong>
+                                </div>
+                            </div>
+
+                        </div>
+                    </div>
+
+                    <!-- Fehlermeldung bei API-Problemen oder abgelaufenen Terminen -->
+                    <p id="weather-error" style="display: none; color: var(--color-text-muted-light); font-size: 0.85rem; font-style: italic; margin: 0;"></p>
+                </div>
+            </div>
+
         </div>
 
-        <!-- Rechter Bereich: Info-Card, Wetter, Teilnehmer & Aktionen -->
+        <!-- RECHTER BEREICH: Sidebar -->
         <div class="fm-detail-sidebar">
-            <div class="fm-detail-card">
 
-                <!-- Treffen-Details Überschrift mit den Aktions-Buttons daneben -->
+            <!-- Kachel 1: Treffen-Details und An-/Abmeldeaktionen -->
+            <div class="fm-detail-card">
                 <h3 class="fm-detail-card-title" style="display: flex; justify-content: space-between; align-items: center; gap: 12px; margin-top: 0; margin-bottom: 20px;">
                     <span>Treffen-Details</span>
+                    <!-- Administrative Aktionen: Nur für den Ersteller des Treffens sichtbar -->
                     <?php if ((int)$meetup['creator_id'] === (int)session()->get('fm_user_id')): ?>
                         <div class="fm-detail-actions">
-                            <!-- Bearbeiten Icon -->
                             <a href="<?= base_url('flightmeet/meetups/edit/' . $meetup['id']) ?>"
                                class="btn-action-edit"
                                title="Flugtreffen bearbeiten">
                                 <i class="ph ph-pencil" style="font-size: 1.2rem;"></i>
                             </a>
 
-                            <!-- Löschen Formular + Icon -->
                             <form method="post" action="<?= base_url('flightmeet/meetups/delete/' . $meetup['id']) ?>"
                                   onsubmit="return confirm('Möchten Sie dieses Flugtreffen wirklich löschen? Alle Anmeldungen gehen dabei verloren.');"
                                   style="display: inline;">
@@ -72,6 +124,7 @@
                     <?php endif; ?>
                 </h3>
 
+                <!-- Metadaten-Liste -->
                 <dl class="fm-detail-info-list">
                     <div class="fm-detail-info-item">
                         <dt><i class="ph ph-map-pin icons-meetup-detail"></i></dt>
@@ -94,10 +147,7 @@
                     <div class="fm-detail-info-item">
                         <dt><i class="ph ph-medal icons-meetup-detail"></i></dt>
                         <dd>
-                            <?php
-                            // Erzeugt dynamisch den Klassennamen (z.B. fm-badge-level--einsteiger)
-                            $levelClass = strtolower(esc($meetup['experience_level']));
-                            ?>
+                            <?php $levelClass = strtolower(esc($meetup['experience_level'])); ?>
                             <span class="fm-badge-level fm-badge-level--<?= $levelClass ?>">
                             <?= esc($meetup['experience_level']) ?>
                         </span>
@@ -122,25 +172,21 @@
 
                 <hr class="fm-divider">
 
-                <!-- Buttons -->
+                <!-- Aktions-Buttons: Anmeldung / Abmeldung / Navigation -->
                 <div class="fm-sidebar-actions">
-                    <!-- Fall 1: Das Treffen ist regulär geplant -->
                     <?php if ($meetup['status'] === 'geplant'): ?>
                         <?php if ($meetup['is_participating']): ?>
-                            <!-- User nimmt bereits teil -> Absagen -->
                             <form method="post" action="<?= base_url('flightmeet/meetups/leave/' . $meetup['id']) ?>" style="width:100%;">
                                 <?= csrf_field() ?>
                                 <button class="btn-danger-full" type="submit">Teilnahme Absagen</button>
                             </form>
                         <?php else: ?>
-                            <!-- User nimmt noch nicht teil -> Teilnehmen -->
                             <form method="post" action="<?= base_url('flightmeet/meetups/join/' . $meetup['id']) ?>" style="width:100%;">
                                 <?= csrf_field() ?>
                                 <button class="btn btn-primary-full" type="submit">Teilnehmen</button>
                             </form>
                         <?php endif; ?>
 
-                        <!-- Fall 2: Das Treffen ist ausgebucht, aber der angemeldete User nimmt teil -->
                     <?php elseif ($meetup['status'] === 'ausgebucht' && $meetup['is_participating']): ?>
                         <form method="post" action="<?= base_url('flightmeet/meetups/leave/' . $meetup['id']) ?>" style="width:100%;">
                             <?= csrf_field() ?>
@@ -148,7 +194,7 @@
                         </form>
                     <?php endif; ?>
 
-                    <!-- Link zurück zur Übersicht (dynamisch je nach Herkunft) -->
+                    <!-- Dynamischer Zurück-Link (abhängig vom HTTP-Referer/Verlauf) -->
                     <?php if ($from_page === 'home'): ?>
                         <a class="btn-secondary-full" href="<?= site_url('flightmeet') ?>">
                             Zurück zur Startseite
@@ -163,19 +209,22 @@
                         </a>
                     <?php endif; ?>
                 </div>
+            </div>
 
-                <hr class="fm-divider">
-
-                <!-- Teilnehmer-Sektion -->
-                <h4 class="fm-sidebar-subtitle">Teilnehmende (<?= count($meetup['participants']) ?>)</h4>
+            <!-- Kachel 2: Auflistung aller angemeldeten Teilnehmer -->
+            <div class="fm-detail-card" style="margin-top: 20px;">
+                <h3 class="fm-detail-card-title" style="margin-top: 0; margin-bottom: 16px;">
+                    Teilnehmende (<?= count($meetup['participants']) ?>)
+                </h3>
                 <?php if (empty($meetup['participants'])): ?>
-                    <p class="fm-empty-text">Noch keine Teilnehmer angemeldet.</p>
+                    <p class="fm-empty-text" style="margin-bottom: 0;">Noch keine Teilnehmer angemeldet.</p>
                 <?php else: ?>
-                    <ul class="fm-participants-list">
+                    <ul class="fm-participants-list" style="margin-bottom: 0;">
                         <?php foreach ($meetup['participants'] as $p): ?>
                             <li>
                                 <span class="fm-participant-avatar">👤</span>
                                 <span class="fm-participant-name"><?= esc($p['username']) ?></span>
+                                <!-- Chat-Icon: Ermöglicht direkte Kontaktaufnahme (außer bei sich selbst) -->
                                 <?php if ((int)$p['id'] !== (int)session()->get('fm_user_id')): ?>
                                     <span class="fm-participant-mail">
                                         <a style="text-decoration: none;" href="<?= base_url('flightmeet/chat') ?>"><i class="ph ph-envelope icons-meetup-mail"></i> </a>
@@ -187,64 +236,24 @@
                 <?php endif; ?>
             </div>
 
-            <!-- NEU: INTERAKTIVE WETTER-KARTE -->
-            <div class="fm-detail-card" style="margin-top: 20px;">
-                <h3 class="fm-detail-card-title" style="display: flex; align-items: center; gap: 8px; margin: 0 0 16px 0;">
-                    <i class="ph ph-cloud-sun" style="font-size: 1.3rem; color: var(--color-primary);"></i>
-                    <span>Wettervorhersage</span>
-                </h3>
-
-                <div id="weather-loading" style="color: var(--color-text-muted); font-size: 0.9rem;">
-                    <i class="ph ph-spinner-gap weather-spin"></i> Lade Wetterdaten...
-                </div>
-
-                <div id="weather-info" style="display: none;">
-                    <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 12px;">
-                        <i id="weather-icon" class="ph" style="font-size: 2.5rem; color: var(--color-primary);"></i>
-                        <div>
-                            <span id="weather-temp" style="font-size: 1.4rem; font-weight: 700; color: var(--color-text-title);"></span>
-                            <p id="weather-desc" style="margin: 0; font-size: 0.9rem; color: var(--color-text-muted-dark);"></p>
-                        </div>
-                    </div>
-                    <div style="display: flex; flex-direction: column; gap: 6px; font-size: 0.85rem; border-top: 1px dashed var(--color-border-medium); padding-top: 12px;">
-                        <div style="display: flex; justify-content: space-between;">
-                            <span style="color: var(--color-text-muted);">Max. Windgeschwindigkeit:</span>
-                            <strong id="weather-wind"></strong>
-                        </div>
-                    </div>
-                    <!-- NEU: Windböen -->
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: var(--color-text-muted);">Stärkste Windböen:</span>
-                        <strong id="weather-gusts"></strong>
-                    </div>
-                    <!-- NEU: Windrichtung -->
-                    <div style="display: flex; justify-content: space-between;">
-                        <span style="color: var(--color-text-muted);">Hauptwindrichtung:</span>
-                        <strong id="weather-direction"></strong>
-                    </div>
-                </div>
-
-                <p id="weather-error" style="display: none; color: var(--color-text-muted-light); font-size: 0.85rem; font-style: italic; margin: 0;"></p>
-            </div>
         </div>
     </div>
 
     <script>
-        // LEAFLET MAP INITIALISIERUNG
+        // Leaflet-Karte initialisieren und Startplatz-Marker setzen
         const map = L.map('map').setView([<?= esc($meetup['latitude']) ?>, <?= esc($meetup['longitude']) ?>], 10);
         L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
             attribution: '&copy; OpenStreetMap-Mitwirkende'
         }).addTo(map);
         var paragliderIcon = L.icon({
             iconUrl: '<?= base_url('assets/icons/paraglider.png') ?>',
-
-            iconSize: [40, 40],      // Breite, Höhe
-            iconAnchor: [20, 40],    // Punkt des Icons auf der Koordinate
-            popupAnchor: [0, -40]    // Position des Popups relativ zum Icon
+            iconSize: [40, 40],
+            iconAnchor: [20, 40],
+            popupAnchor: [0, -40]
         });
         var marker = L.marker([<?= esc($meetup['latitude']) ?>, <?= esc($meetup['longitude']) ?>], {icon: paragliderIcon}).addTo(map);
 
-        // Hilfsfunktion zur Umrechnung von Grad in Himmelsrichtungen
+        // Konvertiert numerische Windgrade in Himmelsrichtungen (N, NO, etc.)
         function getWindDirection(degree) {
             const directions = ['N', 'NO', 'O', 'SO', 'S', 'SW', 'W', 'NW'];
             const index = Math.round(((degree % 360) / 45)) % 8;
@@ -268,6 +277,7 @@
             const diffTime = targetDate - today;
             const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
 
+            // Sicherheitsbarriere: Wetterdaten sind über die Open-Meteo-API erst 14 Tage vor dem Termin verfügbar
             if (diffDays > 14) {
                 loadingEl.style.display = 'none';
                 errorEl.style.display = 'block';
@@ -275,7 +285,7 @@
                 return;
             }
 
-            // API URL mit wind_gusts_10m_max und wind_direction_10m_dominant erweitert
+            // API-Anfrage an Open-Meteo absenden
             const apiUrl = `https://api.open-meteo.com/v1/forecast?latitude=${lat}&longitude=${lng}&daily=weather_code,temperature_2m_max,temperature_2m_min,wind_speed_10m_max,wind_gusts_10m_max,wind_direction_10m_dominant&timezone=auto&start_date=${meetDate}&end_date=${meetDate}`;
 
             fetch(apiUrl)
@@ -291,12 +301,11 @@
                     const weatherCode = data.daily.weather_code[0];
                     const tempMax = Math.round(data.daily.temperature_2m_max[0]);
                     const tempMin = Math.round(data.daily.temperature_2m_min[0]);
-
-                    // Neue Winddaten auslesen
                     const windMax = Math.round(data.daily.wind_speed_10m_max[0]);
                     const gustsMax = data.daily.wind_gusts_10m_max ? Math.round(data.daily.wind_gusts_10m_max[0]) : null;
                     const windDirDeg = data.daily.wind_direction_10m_dominant ? data.daily.wind_direction_10m_dominant[0] : null;
 
+                    // Mapping-Tabelle für WMO-Wettercodes auf Beschreibungen und Icons
                     const weatherMap = {
                         0: { desc: 'Sonnig/Wolkenlos', icon: 'ph-sun' },
                         1: { desc: 'Meist klar', icon: 'ph-sun' },
@@ -321,19 +330,17 @@
 
                     const wDetails = weatherMap[weatherCode] || { desc: 'Bedeckt', icon: 'ph-cloud' };
 
-                    // Elemente befüllen
+                    // DOM-Elemente befüllen
                     document.getElementById('weather-temp').innerText = `${tempMax}°C / ${tempMin}°C`;
                     document.getElementById('weather-desc').innerText = wDetails.desc;
                     document.getElementById('weather-wind').innerText = `${windMax} km/h`;
 
-                    // Böen anzeigen
                     if (gustsMax !== null) {
                         document.getElementById('weather-gusts').innerText = `${gustsMax} km/h`;
                     } else {
                         document.getElementById('weather-gusts').innerText = '--';
                     }
 
-                    // Windrichtung übersetzen und anzeigen
                     if (windDirDeg !== null) {
                         const dirText = getWindDirection(windDirDeg);
                         document.getElementById('weather-direction').innerText = `${dirText} (${windDirDeg}°)`;

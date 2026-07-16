@@ -25,7 +25,7 @@ class MeetupModel extends Model
         'latitude',
     ];
 
-    public function getMeetups(array $filters): array
+    public function getMeetups(array $filters, ?int $currentUserId = null): array
     {
         $this->autoClosePastMeetups();
 
@@ -36,12 +36,20 @@ class MeetupModel extends Model
         $status = array_values(array_filter($status, static fn($s) => $s !== ''));  // Entferne leere Werte
 
         $builder = $this->db->table($this->table . ' fm');
+
+        // SELECT-Felder definieren und um die Teilnahme-Prüfung ergänzen
+        $selectFields = 'fm.id, fm.title, fm.location, fm.region, fm.description, fm.meet_date, fm.meet_time, '
+            . 'fm.experience_level, fm.creator_is_private, fm.max_participants, fm.status, fm.longitude, fm.latitude, '
+            . 'COUNT(p.user_id) AS participants_count';
+
+        if ($currentUserId !== null) {
+            $selectFields .= ', COALESCE(MAX(CASE WHEN p.user_id = ' . (int)$currentUserId . ' THEN 1 ELSE 0 END), 0) AS is_participating';
+        } else {
+            $selectFields .= ', 0 AS is_participating';
+        }
+
         $builder
-            ->select(
-                'fm.id, fm.title, fm.location, fm.region, fm.description, fm.meet_date, fm.meet_time, '
-                . 'fm.experience_level, fm.creator_is_private, fm.max_participants, fm.status, fm.longitude, fm.latitude, '
-                . 'COUNT(p.user_id) AS participants_count'
-            )
+            ->select($selectFields, false)
             ->join('fm_flight_meet_participants p', 'p.flight_meet_id = fm.id', 'left')
             ->groupBy('fm.id')
             ->orderBy('fm.meet_date', 'ASC');

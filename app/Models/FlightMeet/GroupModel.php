@@ -25,17 +25,17 @@ class GroupModel extends Model
     protected $updatedField  = 'updated_at';
 
     /**
-     * Holt alle Gruppen inklusive der aktuellen Mitgliederanzahl
+     * Holt alle Gruppen inklusive der aktuellen Mitgliederanzahl.
+     * Sortiert zuerst nach Mitgliedschaft des Nutzers, danach alphabetisch nach Name.
      */
-    public function getGroups(string $search = ''): array
+    public function getGroups(string $search = '', ?int $userId = null, bool $myGroups = false): array
     {
         $builder = $this->db->table($this->table . ' g');
         $builder->select('g.*, COUNT(m.user_id) as members_count')
             ->join('fm_group_members m', 'm.group_id = g.id', 'left')
-            ->groupBy('g.id')
-            ->orderBy('g.name', 'ASC');
+            ->groupBy('g.id');
 
-        // Wenn ein Suchbegriff angegeben ist, filtere die Gruppen nach Name, Region oder Beschreibung
+        // Suchfilter anwenden
         if ($search !== '') {
             $builder->groupStart()
                 ->like('g.name', $search)
@@ -43,6 +43,23 @@ class GroupModel extends Model
                 ->orLike('g.region', $search)
                 ->groupEnd();
         }
+
+        // Steuerung der Sortierung und Filterung nach Mitgliedschaft
+        if ($userId !== null) {
+            // LEFT JOIN, um den Mitgliedschaftsstatus des aktuellen Benutzers zu ermitteln
+            $builder->join('fm_group_members my_m', 'my_m.group_id = g.id AND my_m.user_id = ' . (int)$userId, 'left');
+
+            // Wenn explizit nur eigene Gruppen gewünscht sind, filtern wir andere heraus
+            if ($myGroups) {
+                $builder->where('my_m.user_id IS NOT NULL');
+            }
+
+            // Primäre Sortierung: Eigene Gruppen (0) vor fremden Gruppen (1)
+            $builder->orderBy('CASE WHEN my_m.user_id IS NOT NULL THEN 0 ELSE 1 END', 'ASC', false);
+        }
+
+        // Sekundäre Sortierung: Alphabetisch nach Gruppenname
+        $builder->orderBy('g.name', 'ASC');
 
         return $builder->get()->getResultArray();
     }

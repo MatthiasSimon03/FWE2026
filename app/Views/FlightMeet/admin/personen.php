@@ -91,7 +91,8 @@
 
                 <!-- Buttons im Modal -->
                 <div style="display: flex; gap: 10px; margin-top: 14px; justify-content: flex-end;">
-                    <button type="button" onclick="closeEditModal()" class="btn-secondary" style="padding: 8px 16px; font-size: 0.85rem; cursor: pointer; border-radius: 6px;">Abbrechen</button>
+                    <!-- NEU: id="btn-close-modal" hinzugefügt, inline-onclick entfernt -->
+                    <button type="button" id="btn-close-modal" class="btn-secondary" style="padding: 8px 16px; font-size: 0.85rem; cursor: pointer; border-radius: 6px;">Abbrechen</button>
                     <button type="submit" class="btn" style="padding: 8px 16px; font-size: 0.85rem; cursor: pointer; border-radius: 6px; border:none; background: var(--color-primary); color: white; font-weight: 600;">Speichern</button>
                 </div>
             </form>
@@ -107,6 +108,7 @@
 
     <script>
         document.addEventListener('DOMContentLoaded', () => {
+            // Vollständige Kapselung der API-Verbindungsschlüssel im lokalen JS-Scope
             const apiToken = '<?= $apiToken ?? "" ?>';
             const currentUserId = <?= (int)session()->get('fm_user_id') ?>;
             const apiBaseUrl = '<?= base_url('api/flightmeet/admin/users') ?>';
@@ -118,9 +120,10 @@
             const emptyText = document.getElementById('empty-search-text');
             const feedbackEl = document.getElementById('api-feedback');
 
-            // Modal Elemente
+            // Modal-Elemente
             const editModal = document.getElementById('edit-modal');
             const editForm = document.getElementById('edit-user-form');
+            const closeModalBtn = document.getElementById('btn-close-modal');
             const editUserIdInput = document.getElementById('edit-user-id');
             const editUsernameInput = document.getElementById('edit-username');
             const editLevelInput = document.getElementById('edit-level');
@@ -153,7 +156,7 @@
                     });
             }
 
-            // 2. DOM-Tabelle rendern
+            // 2. DOM-Tabelle rendern (XSS-sicher strukturiert, frei von inline onclicks)
             function renderTable(usersList) {
                 tbody.innerHTML = '';
 
@@ -191,12 +194,12 @@
                 </td>
                 <td style="padding: 12px 8px; text-align: right;">
                     <div style="display: flex; gap: 8px; justify-content: flex-end;">
-                        <!-- Bearbeiten (Öffnet Modal) -->
-                        <button onclick="openEditModal(${user.id})" class="btn-action-edit" title="Profil bearbeiten">
+                        <!-- Bearbeiten (Sicher mit data-id deklariert) -->
+                        <button class="btn-action-edit btn-trigger-edit" data-id="${user.id}" title="Profil bearbeiten">
                             <i class="ph ph-pencil" style="font-size: 1.1rem;"></i>
                         </button>
-                        <!-- Löschen -->
-                        <button onclick="deleteUser(${user.id}, '${escapeJs(user.username)}')" class="btn-action-delete" title="Dauerhaft löschen" ${isSelf ? 'disabled style="opacity: 0.4; cursor: not-allowed;"' : ''}>
+                        <!-- Löschen (Sicher mit data-id und data-username deklariert) -->
+                        <button class="btn-action-delete btn-trigger-delete" data-id="${user.id}" data-username="${escapeHtml(user.username)}" title="Dauerhaft löschen" ${isSelf ? 'disabled style="opacity: 0.4; cursor: not-allowed;"' : ''}>
                             <i class="ph ph-trash" style="font-size: 1.1rem;"></i>
                         </button>
                     </div>
@@ -206,8 +209,8 @@
                 });
             }
 
-            // 3. Modal-Interaktion: Öffnen & Vorbefüllen
-            window.openEditModal = function(userId) {
+            // 3. Modal-Interaktionen (Kapselung im Event-Scope)
+            function openEditModal(userId) {
                 const user = allUsers.find(u => parseInt(u.id) === userId);
                 if (!user) return;
 
@@ -216,7 +219,6 @@
                 editLevelInput.value = user.experience_level;
                 editRoleInput.value = user.role;
 
-                // Wenn der Admin sich selbst bearbeitet, darf er seine eigene Rolle nicht ändern können
                 if (userId === currentUserId) {
                     editRoleInput.disabled = true;
                 } else {
@@ -224,13 +226,32 @@
                 }
 
                 editModal.style.display = 'flex';
-            };
+            }
 
-            // Modal schließen
-            window.closeEditModal = function() {
+            function closeEditModal() {
                 editModal.style.display = 'none';
                 editForm.reset();
-            };
+            }
+
+            // Event-Listener für Modal-Abbrechen-Aktion zuweisen
+            closeModalBtn.addEventListener('click', closeEditModal);
+
+            // Zentraler Klick-Listener (Event Delegation) für Tabellenaktionen
+            tbody.addEventListener('click', (e) => {
+                const editBtn = e.target.closest('.btn-trigger-edit');
+                if (editBtn) {
+                    const userId = parseInt(editBtn.dataset.id);
+                    openEditModal(userId);
+                    return;
+                }
+
+                const deleteBtn = e.target.closest('.btn-trigger-delete');
+                if (deleteBtn && !deleteBtn.disabled) {
+                    const userId = parseInt(deleteBtn.dataset.id);
+                    const username = deleteBtn.dataset.username;
+                    deleteUser(userId, username);
+                }
+            });
 
             // 4. PUT: Änderungen über REST API abspeichern
             editForm.addEventListener('submit', (e) => {
@@ -260,7 +281,7 @@
                     })
                     .then(res => {
                         if (res.success) {
-                            // 1. Lokalen Cache aktualisieren
+                            // Lokalen Cache aktualisieren
                             const userIndex = allUsers.findIndex(u => parseInt(u.id) === userId);
                             if (userIndex !== -1) {
                                 allUsers[userIndex].username = res.user.username;
@@ -268,7 +289,7 @@
                                 allUsers[userIndex].role = res.user.role;
                             }
 
-                            // 2. DOM-Zeile visuell aktualisieren
+                            // DOM-Zeile visuell aktualisieren
                             const isSelf = userId === currentUserId;
                             document.getElementById(`td-username-${userId}`).innerHTML = `${escapeHtml(res.user.username)} ${isSelf ? '<span style="font-size: 0.75rem; color: var(--color-primary); font-weight: normal;">(Du)</span>' : ''}`;
                             document.getElementById(`td-level-${userId}`).innerHTML = `
@@ -289,8 +310,8 @@
                     });
             });
 
-            // 5. DELETE: Account löschen
-            window.deleteUser = function(userId, username) {
+            // 5. DELETE: Account über REST API löschen
+            function deleteUser(userId, username) {
                 if (!confirm(`Möchtest du den Piloten "${username}" wirklich unwiderruflich löschen?`)) {
                     return;
                 }
@@ -321,9 +342,9 @@
                         }
                     })
                     .catch(err => showFeedback(err.message, 'error'));
-            };
+            }
 
-            // Live-Suche
+            // Live-Suche über Event-Listener
             searchInput.addEventListener('input', (e) => {
                 const query = e.target.value.toLowerCase().trim();
                 const filtered = allUsers.filter(u =>
@@ -333,7 +354,7 @@
                 renderTable(filtered);
             });
 
-            // Hilfsfunktion für Banner-Rückmeldungen
+            // Status-Feedback ausgeben (Erfolg/Fehler)
             function showFeedback(msg, type) {
                 feedbackEl.innerText = msg;
                 feedbackEl.style.display = 'block';
@@ -351,14 +372,11 @@
                 }, 5000);
             }
 
+            // HTML Escaping Funktion gegen XSS-Angriffe
             function escapeHtml(str) {
                 const div = document.createElement('div');
                 div.innerText = str;
                 return div.innerHTML;
-            }
-
-            function escapeJs(str) {
-                return str.replace(/'/g, "\\_");
             }
 
             loadMembers();

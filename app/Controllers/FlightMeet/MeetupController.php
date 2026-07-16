@@ -44,11 +44,12 @@ class MeetupController extends BaseController
 
         // Dropdowns dynamisch mit Werten befüllen, die in der DB existieren
         $options = $this->meetupModel->getFilterOptions();
+        $currentUserId = session()->get('fm_user_id');
 
         return $this->response->setBody(view('FlightMeet/meetups', [
             'title'   => 'FlightMeet - Flugtreffen',
             'active'  => 'meetups',
-            'meetups' => $this->meetupModel->getMeetups($filters),
+            'meetups' => $this->meetupModel->getMeetups($filters, $currentUserId),
             'filters' => $filters,
             'options' => $options,
         ]));

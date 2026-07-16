@@ -7,7 +7,7 @@ use CodeIgniter\HTTP\ResponseInterface;
 
 class AdminController extends BaseController
 {
-    private string $secretKey = 'FM_SUPER_SECRET_KEY_123!'; // Muss exakt mit dem API-Schlüssel übereinstimmen
+    private string $secretKey = 'FM_SUPER_SECRET_KEY_123!';
 
     /**
      * Rendert die Mitgliederverwaltung und stellt das API-Token bereit

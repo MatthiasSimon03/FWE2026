@@ -1,7 +1,7 @@
 <?= $this->extend('FlightMeet/layout') ?>
 <?= $this->section('content') ?>
 
-    <!-- CSS für den Kalender und das Tab-Layout direkt integriert -->
+    <!-- Lokale Styling-Ergänzungen für die Kalenderansicht und Statusfarben -->
     <style>
         /* Styling für die Kalenderansicht */
         .fm-calendar-container {
@@ -110,10 +110,7 @@
             transition: all 0.15s ease-in-out;
         }
 
-        /* --------------------------------------------------------------------------
-           STATUS-FARBEN IM KALENDER
-           -------------------------------------------------------------------------- */
-        /* 1. Geplant */
+        /* Status-Farben innerhalb der Kalenderzellen */
         .fm-calendar-event--geplant {
             background-color: var(--color-primary);
             color: #ffffff;
@@ -122,7 +119,6 @@
             background-color: var(--color-primary-hover);
         }
 
-        /* 2. Ausgebucht */
         .fm-calendar-event--ausgebucht {
             background-color: var(--color-status-ausgebucht);
             color: #ffffff;
@@ -131,7 +127,6 @@
             background-color: #92400e;
         }
 
-        /* 3. Abgesagt (Hellrot + Durchgestrichener Text) */
         .fm-calendar-event--abgesagt {
             background-color: var(--color-status-abgesagt-bg);
             color: var(--color-status-abgesagt);
@@ -142,7 +137,6 @@
             background-color: #fca5a5;
         }
 
-        /* 4. Abgeschlossen / Vergangenheit (Grau gehalten) */
         .fm-calendar-event--abgeschlossen {
             background-color: var(--color-status-abgeschlossen-bg);
             color: var(--color-text-muted);
@@ -154,7 +148,7 @@
         }
     </style>
 
-    <!-- Globale Feedback-Meldungen -->
+    <!-- Globale Feedback-Meldungen bei Erfolgen oder Fehlern -->
 <?php if (session()->getFlashdata('success')): ?>
     <div class="alert alert-success"><?= esc(session()->getFlashdata('success')) ?></div>
 <?php endif; ?>
@@ -163,6 +157,8 @@
 <?php endif; ?>
 
     <div class="fm-detail-layout">
+
+        <!-- LINKER HAUPTBEREICH: Beschreibung, Regeln & Tabs -->
         <div class="fm-detail-main">
             <div class="fm-detail-header" style="flex-wrap: wrap;">
                 <div>
@@ -172,7 +168,7 @@
                     </p>
                 </div>
 
-                <!-- Nur der Owner darf die Gruppe bearbeiten oder löschen -->
+                <!-- Administrative Steuerung: Nur für den Besitzer der Gruppe sichtbar -->
                 <?php if ($user_role === 'owner'): ?>
                     <div class="fm-detail-actions">
                         <a href="<?= base_url('flightmeet/groups/edit/' . $group['id']) ?>" class="btn-action-edit" title="Gruppe bearbeiten">
@@ -190,6 +186,7 @@
 
             <p class="lead fm-detail-desc"><?= esc($group['description']) ?></p>
 
+            <!-- Statisch hinterlegte Gruppenregeln -->
             <?php if (!empty($group['rules'])): ?>
                 <div class="card">
                     <h3 style="margin-top: 0; font-size: 1rem; color: var(--color-text-title); display: flex; align-items: center; gap: 6px;">
@@ -199,7 +196,7 @@
                 </div>
             <?php endif; ?>
 
-            <!-- Haupt-Navigation für Gruppeninhalte -->
+            <!-- Navigationstabs für Gruppeninhalte -->
             <h2 class="fm-section-title">Gruppen-Aktivitäten</h2>
             <div class="fm-view-toggle" style="margin-bottom: 20px; display: inline-flex;">
                 <button class="fm-toggle-btn is-active" type="button" data-tab-target="tab-list">
@@ -215,11 +212,13 @@
 
             <!-- TAB 1: FLUGLISTE -->
             <div id="tab-list" class="tab-content">
+                <!-- Sub-Navigation innerhalb der Gruppenflugliste -->
                 <div class="fm-view-toggle" style="margin-bottom: 15px; background-color: var(--color-bg-light); padding: 4px;">
                     <button class="fm-toggle-btn is-active" type="button" onclick="switchFlightTab('active')" style="font-size: 0.85rem;">Geplant</button>
                     <button class="fm-toggle-btn" type="button" onclick="switchFlightTab('historic')" style="font-size: 0.85rem;">Vergangene Flüge</button>
                 </div>
 
+                <!-- Geplante Treffen der Gruppe -->
                 <div id="flights-active">
                     <?php if (empty($scheduled_flights)): ?>
                         <p class="fm-empty">Aktuell sind keine geplanten Flüge von Mitgliedern aktiv.</p>
@@ -249,6 +248,7 @@
                     <?php endif; ?>
                 </div>
 
+                <!-- Historische Treffen der Gruppe -->
                 <div id="flights-historic" style="display: none;">
                     <?php if (empty($historic_flights)): ?>
                         <p class="fm-empty">Keine vergangenen Gruppenflüge vorhanden.</p>
@@ -281,6 +281,7 @@
 
             <!-- TAB 2: GRUPPENKARTE -->
             <div id="tab-map" class="tab-content" style="display: none;">
+                <!-- Datenübergabe für interaktive Leaflet-Karte via HTML5-Datenattribute -->
                 <div id="group-flights-map"
                      style="height: 480px; width: 100%; border-radius: 12px; border: 1px solid var(--color-border-medium);"
                      data-base-lat="<?= esc($group['latitude']) ?>"
@@ -306,14 +307,13 @@
                             Weiter <i class="ph ph-caret-right"></i>
                         </button>
                     </div>
-                    <div class="fm-calendar-grid" id="calendar-grid">
-                        <!-- Wochentage & Zellen werden per JS injiziert -->
-                    </div>
+                    <!-- Kalenderzellen werden dynamisch via DynamicFlightCalendar initialisiert -->
+                    <div class="fm-calendar-grid" id="calendar-grid"></div>
                 </div>
             </div>
         </div>
 
-        <!-- Rechte Sidebar -->
+        <!-- RECHTE SIDEBAR: Spezifikationen & Verwaltung -->
         <div class="fm-detail-sidebar">
             <div class="fm-detail-card">
                 <h3 class="fm-detail-card-title">Gruppen-Details</h3>
@@ -333,6 +333,7 @@
                     </div>
                 </dl>
 
+                <!-- Gruppen-Beitritt bzw. Verlassen-Aktionen -->
                 <div class="fm-sidebar-actions" style="margin-top: 20px;">
                     <?php if ($is_member): ?>
                         <form method="post" action="<?= base_url('flightmeet/groups/leave/' . $group['id']) ?>" style="width: 100%;">
@@ -350,7 +351,7 @@
                     <a class="btn-secondary-full" href="<?= base_url('flightmeet/groups') ?>">Zurück zur Übersicht</a>
                 </div>
 
-                <!-- Beitrittsanfragen -->
+                <!-- Beitrittsanfragen: Nur sichtbar für berechtigte Rollen (Owner/Admin) -->
                 <?php if (!empty($pending_requests)): ?>
                     <hr class="fm-divider">
                     <h4 class="fm-sidebar-subtitle">Offene Beitrittsanfragen (<?= count($pending_requests) ?>)</h4>
@@ -376,7 +377,7 @@
                     </div>
                 <?php endif; ?>
 
-                <!-- Mitglieder-Verwaltung -->
+                <!-- Mitglieder-Verwaltung (Rollenrechte-Aktionen für Owner und Admins) -->
                 <hr class="fm-divider">
                 <h4 class="fm-sidebar-subtitle" style="margin-bottom: 12px;">Mitglieder-Verwaltung</h4>
                 <ul class="fm-participants-list" style="max-height: 250px;">
@@ -396,7 +397,7 @@
                                 <?php endif; ?>
                             </div>
 
-                            <!-- Mitgliederverwaltung -->
+                            <!-- Rollenaktionen (Promote, Demote, Kick, Inhaber-Wechsel) -->
                             <?php if (in_array($user_role, ['owner', 'admin'], true) && (int)$m['user_id'] !== (int)session()->get('fm_user_id') && $m['role'] !== 'owner'): ?>
                                 <div style="display: flex; flex-wrap: wrap; gap: 6px; margin-top: 6px;">
                                     <?php if ($user_role === 'owner'): ?>
@@ -418,6 +419,7 @@
                                         </form>
                                     <?php endif; ?>
 
+                                    <!-- Kicking-Hierarchien beachten (Admin darf keine Admins kicken) -->
                                     <?php
                                     $canKick = ($user_role === 'owner') || ($user_role === 'admin' && $m['role'] === 'member');
                                     ?>
@@ -437,7 +439,7 @@
     </div>
 
     <script>
-        // 1. FLUG-LISTE-TABS (Geplant vs. Historisch)
+        // Umschalter für aktive vs. historische Gruppenflüge
         function switchFlightTab(tab) {
             const buttons = document.querySelectorAll('#tab-list .fm-view-toggle button');
             const activeFlightsDiv = document.getElementById('flights-active');
@@ -459,25 +461,25 @@
         let gCalendar = null;
 
         document.addEventListener('DOMContentLoaded', () => {
-            // Wartet in sehr kurzen Abständen, bis flightmeet.js geladen und bereit ist
+            // Zyklische Prüfung, um Race Conditions beim Laden von flightmeet.js zu verhindern
             const checkInterval = setInterval(() => {
                 if (typeof initDynamicFlightsMap !== 'undefined' && typeof DynamicFlightCalendar !== 'undefined') {
-                    clearInterval(checkInterval); // Intervall stoppen, sobald Funktionen existieren
+                    clearInterval(checkInterval);
 
-                    // Generische Karte initialisieren (Basis-Stützpunkt + Flüge)
+                    // Karte initialisieren (Basis-Stützpunkt + Flüge)
                     initDynamicFlightsMap('group-flights-map');
 
-                    // Generischen Kalender initialisieren
+                    // Kalender-Klasse instanziieren und rendern
                     const calendarFlights = <?= json_encode(array_merge($scheduled_flights, $historic_flights)) ?>;
                     gCalendar = new DynamicFlightCalendar('calendar', calendarFlights, '<?= base_url() ?>', '<?= $group['id'] ?>');
 
-                    // Event-Handler für die Buttons zuweisen
+                    // Event-Handler für Kalender-Steuerung global registrieren
                     window.prevMonth = () => { gCalendar.prev(); };
                     window.nextMonth = () => { gCalendar.next(); };
 
                     gCalendar.render();
                 }
-            }, 30); // Alle 30ms prüfen
+            }, 30);
         });
     </script>
 

@@ -26,8 +26,12 @@ class GroupController extends BaseController
     public function index()
     {
         $search = $this->request->getGet('q') ?? '';
-        $groups = $this->groupModel->getGroups($search);
+        // Holt den Status der "Nur meine Gruppen"-Checkbox (gibt true/false zurück)
+        $myGroups = $this->request->getGet('my_groups') === '1';
         $userId = session()->get('fm_user_id');
+
+        // Übergabe der Filterparameter an das Model
+        $groups = $this->groupModel->getGroups($search, $userId, $myGroups);
 
         // Für jede Gruppe Beziehungsdaten des aktuellen Nutzers holen
         foreach ($groups as &$group) {
@@ -37,10 +41,11 @@ class GroupController extends BaseController
         }
 
         return view('FlightMeet/groups/index', [
-            'title'  => 'Gruppenübersicht',
-            'active' => 'groups',
-            'groups' => $groups,
-            'search' => $search
+            'title'     => 'Gruppenübersicht',
+            'active'    => 'groups',
+            'groups'    => $groups,
+            'search'    => $search,
+            'my_groups' => $myGroups
         ]);
     }
 
